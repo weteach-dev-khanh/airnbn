@@ -1,0 +1,220 @@
+{% load static %}
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent py-4"
+     style="backdrop-filter: none; background-color: transparent;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo and Desktop Navigation -->
+            <div class="flex items-center">
+                <a href="{% url 'core:home' %}" 
+                   id="navbar-logo"
+                   class="text-xl font-bold transition-colors duration-300 text-white"
+                   style="letter-spacing: 0.5px;">
+                    Nguyễn Việt Anh
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block ml-10">
+                    <div class="flex items-center space-x-6">
+                        <a href="{% url 'core:home' %}" 
+                           class="nav-link text-sm font-medium transition-all text-white hover:text-gray-200"
+                           style="letter-spacing: 0.3px;">
+                            Home
+                        </a>
+                        <a href="{% url 'core:airbnb' %}" 
+                           class="nav-link text-sm font-medium transition-all text-white hover:text-gray-200"
+                           style="letter-spacing: 0.3px;">
+                            Airbnb
+                        </a>
+                        <a href="{% url 'core:courses' %}" 
+                           class="nav-link text-sm font-medium transition-all text-white hover:text-gray-200"
+                           style="letter-spacing: 0.3px;">
+                            Khoá học
+                        </a>
+                        <a href="{% url 'core:blog' %}" 
+                           class="nav-link text-sm font-medium transition-all text-white hover:text-gray-200"
+                           style="letter-spacing: 0.3px;">
+                            Blog
+                        </a>
+                        <a href="{% url 'core:careers' %}" 
+                           class="nav-link text-sm font-medium transition-all text-white hover:text-gray-200"
+                           style="letter-spacing: 0.3px;">
+                            Tuyển dụng
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Contact Button (Desktop) -->
+            <div class="hidden md:flex items-center space-x-4">
+                <button id="search-btn"
+                        class="p-2 rounded-full transition-colors text-white hover:bg-white/10"
+                        aria-label="Search">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <a href="{% url 'core:contact' %}"
+                   id="contact-btn"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all text-black bg-white hover:bg-gray-100"
+                   style="box-shadow: 0 2px 15px rgba(0,0,0,0.2);">
+                    Liên hệ
+                </a>
+            </div>
+
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button onclick="toggleMobileMenu()" 
+                        id="mobile-menu-btn"
+                        class="inline-flex items-center justify-center p-2 rounded-md transition-colors text-white hover:bg-white/10"
+                        aria-label="Menu">
+                    <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+                    <i data-lucide="x" class="w-6 h-6 hidden" id="close-icon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg"
+         style="backdrop-filter: blur(10px); background-color: rgba(255, 255, 255, 0.95);">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="{% url 'core:home' %}" 
+               class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+               style="letter-spacing: 0.3px;">
+                Home
+            </a>
+            <a href="{% url 'core:airbnb' %}" 
+               class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+               style="letter-spacing: 0.3px;">
+                Airbnb
+            </a>
+            <a href="{% url 'core:courses' %}" 
+               class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+               style="letter-spacing: 0.3px;">
+                Khoá học
+            </a>
+            <a href="{% url 'core:blog' %}" 
+               class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+               style="letter-spacing: 0.3px;">
+                Blog
+            </a>
+            <a href="{% url 'core:careers' %}" 
+               class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+               style="letter-spacing: 0.3px;">
+                Tuyển dụng
+            </a>
+            <div class="flex items-center px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all mx-1">
+                <i data-lucide="search" class="w-5 h-5 text-gray-700 mr-2"></i>
+                <span class="text-gray-600">Tìm kiếm</span>
+            </div>
+            <a href="{% url 'core:contact' %}"
+               class="block px-3 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded-md text-center mx-3 mt-2 transition-all"
+               style="letter-spacing: 0.3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                Liên hệ
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Navbar scroll styles - matching original Next.js behavior */
+#navbar.scrolled {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+#navbar.scrolled #navbar-logo {
+    color: #111827 !important;
+}
+
+#navbar.scrolled .nav-link {
+    color: #374151 !important;
+}
+
+#navbar.scrolled .nav-link:hover {
+    color: #000000 !important;
+}
+
+#navbar.scrolled #search-btn {
+    color: #374151 !important;
+}
+
+#navbar.scrolled #search-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+#navbar.scrolled #contact-btn {
+    color: #ffffff !important;
+    background-color: #000000 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+
+#navbar.scrolled #contact-btn:hover {
+    background-color: #374151 !important;
+}
+
+#navbar.scrolled #mobile-menu-btn {
+    color: #4b5563 !important;
+}
+
+#navbar.scrolled #mobile-menu-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Non-home page styles */
+body:not(.home-page) #navbar {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body:not(.home-page) #navbar #navbar-logo {
+    color: #111827 !important;
+}
+
+body:not(.home-page) #navbar .nav-link {
+    color: #374151 !important;
+}
+
+body:not(.home-page) #navbar .nav-link:hover {
+    color: #000000 !important;
+}
+
+body:not(.home-page) #navbar #search-btn {
+    color: #374151 !important;
+}
+
+body:not(.home-page) #navbar #search-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body:not(.home-page) #navbar #contact-btn {
+    color: #ffffff !important;
+    background-color: #000000 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+}
+
+body:not(.home-page) #navbar #contact-btn:hover {
+    background-color: #374151 !important;
+}
+
+body:not(.home-page) #navbar #mobile-menu-btn {
+    color: #4b5563 !important;
+}
+
+body:not(.home-page) #navbar #mobile-menu-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Mobile menu animation */
+#mobile-menu {
+    transition: all 0.3s ease-in-out;
+}
+
+#mobile-menu.show {
+    display: block;
+}
+</style>

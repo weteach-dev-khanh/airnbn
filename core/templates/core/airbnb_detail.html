@@ -1,0 +1,301 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ listing.title }} - Airbnb{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ listing.title }}</h1>
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <div class="flex items-center">
+                    <i data-lucide="star" class="text-black w-5 h-5 mr-1 fill-current"></i>
+                    <span class="font-semibold">{{ listing.rating }}</span>
+                    <span class="text-gray-600 ml-1">({{ listing.reviews_count }} đánh giá)</span>
+                </div>
+                <div class="flex items-center text-gray-600">
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>
+                    <span>{{ listing.location.name }}</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+                    <i data-lucide="share" class="w-5 h-5"></i>
+                    <span>Chia sẻ</span>
+                </button>
+                <button class="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                    <span>Lưu</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Gallery -->
+    <div class="mb-8 rounded-2xl overflow-hidden">
+        {% if listing.get_all_images %}
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-2 h-96 lg:h-[500px]">
+                {% for image in listing.get_all_images|slice:":5" %}
+                    {% if forloop.first %}
+                        <!-- Main image -->
+                        <div class="lg:col-span-2 lg:row-span-2 h-full">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ listing.title }}"
+                                 class="w-full h-full object-cover hover:brightness-90 transition-all cursor-pointer"
+                                 onclick="openImageModal('{{ image.image.url }}')">
+                        </div>
+                    {% else %}
+                        <!-- Secondary images -->
+                        <div class="h-full {% if forloop.counter0 == 1 or forloop.counter0 == 3 %}lg:col-span-2{% endif %}">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ listing.title }}"
+                                 class="w-full h-full object-cover hover:brightness-90 transition-all cursor-pointer"
+                                 onclick="openImageModal('{{ image.image.url }}')">
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Placeholder if no images -->
+            <div class="h-96 lg:h-[500px] bg-gray-300 rounded-2xl flex items-center justify-center">
+                <i data-lucide="image" class="w-32 h-32 text-gray-500"></i>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Property Info -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold mb-2">
+                            {{ listing.property_type.name_vietnamese }} tại {{ listing.location.name_vietnamese }}
+                        </h2>
+                        <div class="flex items-center space-x-4 text-gray-600">
+                            <span>{{ listing.max_guests }} khách</span>
+                            <span>•</span>
+                            <span>{{ listing.bedrooms }} phòng ngủ</span>
+                            <span>•</span>
+                            <span>{{ listing.bathrooms }} phòng tắm</span>
+                        </div>
+                    </div>
+                    {% if listing.host_avatar %}
+                        <img src="{{ listing.host_avatar.url }}" 
+                             alt="{{ listing.host_name }}"
+                             class="w-14 h-14 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-14 h-14 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-6 h-6 text-gray-500"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-4">Mô tả</h3>
+                <div class="prose prose-lg text-gray-700">
+                    {{ listing.description|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            {% if listing.get_amenities %}
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-6">Tiện nghi</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for amenity in listing.get_amenities %}
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>{{ amenity.name_vietnamese }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Host Info -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-6">Về chủ nhà</h3>
+                <div class="flex items-start space-x-4">
+                    {% if listing.host_avatar %}
+                        <img src="{{ listing.host_avatar.url }}" 
+                             alt="{{ listing.host_name }}"
+                             class="w-16 h-16 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-8 h-8 text-gray-500"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">{{ listing.host_name }}</h4>
+                        {% if listing.host_bio %}
+                            <p class="text-gray-600">{{ listing.host_bio }}</p>
+                        {% endif %}
+                        <div class="flex items-center space-x-4 mt-3 text-sm text-gray-600">
+                            {% if listing.host_response_rate %}
+                                <span>Tỷ lệ phản hồi: {{ listing.host_response_rate }}%</span>
+                            {% endif %}
+                            {% if listing.host_response_time %}
+                                <span>•</span>
+                                <span>Thời gian phản hồi: {{ listing.host_response_time }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div>
+                <h3 class="text-xl font-semibold mb-6">Vị trí</h3>
+                <div class="bg-gray-100 rounded-xl h-64 flex items-center justify-center mb-4">
+                    <div class="text-center">
+                        <i data-lucide="map-pin" class="w-12 h-12 text-gray-500 mx-auto mb-2"></i>
+                        <p class="text-gray-600">{{ listing.location.name }}</p>
+                    </div>
+                </div>
+                {% if listing.address %}
+                    <p class="text-gray-600">{{ listing.address }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Booking Card -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-24">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6"
+                     style="box-shadow: 0 15px 40px rgba(0,0,0,0.08);">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-2xl font-bold">{{ listing.get_price_display }} VND</span>
+                                <span class="text-gray-600">/đêm</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="star" class="text-black w-4 h-4 mr-1 fill-current"></i>
+                                <span class="font-semibold">{{ listing.rating }}</span>
+                                <span class="text-gray-600 ml-1">({{ listing.reviews_count }})</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="space-y-4 mb-6">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="border border-gray-300 rounded-lg p-3">
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nhận phòng</label>
+                                <input type="date" class="w-full border-none focus:outline-none text-sm mt-1">
+                            </div>
+                            <div class="border border-gray-300 rounded-lg p-3">
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Trả phòng</label>
+                                <input type="date" class="w-full border-none focus:outline-none text-sm mt-1">
+                            </div>
+                        </div>
+                        <div class="border border-gray-300 rounded-lg p-3">
+                            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Khách</label>
+                            <select class="w-full border-none focus:outline-none text-sm mt-1">
+                                {% for i in "123456789"|make_list %}
+                                    {% if i|add:0 <= listing.max_guests %}
+                                        <option value="{{ i }}">{{ i }} khách</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+
+                    <button class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-lg transition-all mb-4"
+                            style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);">
+                        Đặt phòng ngay
+                    </button>
+
+                    <p class="text-center text-gray-600 text-sm mb-4">
+                        Bạn sẽ chưa bị tính phí
+                    </p>
+
+                    <div class="space-y-3 border-t border-gray-200 pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{{ listing.get_price_display }} VND x 5 đêm</span>
+                            <span>{{ listing.price|floatformat:0|add:"00000" }} VND</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Phí dịch vụ</span>
+                            <span>{{ listing.price|floatformat:0|add:"0000" }} VND</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-200 pt-3 font-semibold">
+                            <span>Tổng cộng</span>
+                            <span>{{ listing.price|floatformat:0|add:"00000" }} VND</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="mt-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
+                    <h4 class="font-semibold mb-3">Cần hỗ trợ?</h4>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Liên hệ với chúng tôi để được tư vấn và hỗ trợ đặt phòng.
+                    </p>
+                    <a href="{% url 'core:contact' %}"
+                       class="inline-block bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-all text-sm font-medium">
+                        Liên hệ ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+        <a href="{% url 'core:airbnb' %}" 
+           class="inline-flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <span>Quay lại danh sách</span>
+        </a>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-4">
+    <div class="relative max-w-5xl max-h-full">
+        <button onclick="closeImageModal()" 
+                class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain">
+    </div>
+</div>
+
+<script>
+function openImageModal(imageSrc) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    modalImage.src = imageSrc;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside the image
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% load static %}
+<footer class="bg-gray-900 text-white py-16" 
+        style="background-image: linear-gradient(to bottom, #111111, #0a0a0a);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Newsletter Section -->
+        <div class="mb-16 p-8 rounded-xl"
+             style="background-color: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold mb-2">Nâng cao kỹ năng của bạn</h3>
+                    <p class="text-gray-400">
+                        Đăng ký nhận bản tin của chúng tôi để cập nhật các mẹo, thủ thuật và chiến lược kinh doanh Airbnb mới nhất.
+                    </p>
+                </div>
+                <div>
+                    <form class="flex flex-col sm:flex-row gap-3">
+                        <input type="email" 
+                               placeholder="Email của bạn"
+                               class="flex-grow px-4 py-3 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit"
+                                class="px-6 py-3 bg-white text-gray-900 font-medium rounded-md hover:bg-gray-200 transition-all"
+                                style="box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                            Đăng ký
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Footer Content -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            <!-- Company Info -->
+            <div class="md:col-span-2">
+                <h3 class="text-xl font-bold mb-4">Nguyễn Việt Anh</h3>
+                <p class="text-gray-400 mb-6 leading-relaxed">
+                    Chuyên gia hàng đầu trong lĩnh vực tư vấn và đào tạo kinh doanh Airbnb tại Việt Nam. 
+                    Với hơn 10 năm kinh nghiệm trong ngành bất động sản và du lịch.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i data-lucide="facebook" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i data-lucide="instagram" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i data-lucide="youtube" class="w-5 h-5"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">
+                        <i data-lucide="linkedin" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Liên kết nhanh</h4>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'core:home' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Trang chủ</a></li>
+                    <li><a href="{% url 'core:airbnb' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Bất động sản</a></li>
+                    <li><a href="{% url 'core:courses' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Khóa học</a></li>
+                    <li><a href="{% url 'core:blog' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Blog</a></li>
+                    <li><a href="{% url 'core:careers' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Tuyển dụng</a></li>
+                    <li><a href="{% url 'core:contact' %}" class="text-gray-400 hover:text-white transition-colors duration-300">Liên hệ</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">Liên hệ</h4>
+                <ul class="space-y-3">
+                    <li class="flex items-center text-gray-400">
+                        <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>
+                        TP. Hồ Chí Minh, Việt Nam
+                    </li>
+                    <li class="flex items-center text-gray-400">
+                        <i data-lucide="phone" class="w-4 h-4 mr-2"></i>
+                        +84 XXX XXX XXX
+                    </li>
+                    <li class="flex items-center text-gray-400">
+                        <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                        contact@nguyenvietanh.com
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Footer -->
+        <div class="border-t border-gray-800 pt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div class="text-gray-400 text-sm">
+                    © 2024 Nguyễn Việt Anh. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="flex flex-wrap justify-start md:justify-end space-x-6 text-sm">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Chính sách bảo mật</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Điều khoản sử dụng</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Cookie</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

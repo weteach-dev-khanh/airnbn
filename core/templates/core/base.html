@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nguyễn Việt Anh - Chuyên gia Airbnb{% endblock %}</title>
+    <meta name="description" content="{% block description %}Chuyên gia Airbnb và đào tạo chuyên nghiệp{% endblock %}">
+    
+    <!-- Static CSS -->
+    <link rel="stylesheet" href="{% static 'core/css/globals.css' %}">
+    
+    <!-- Tailwind CSS CDN (for quick setup) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="font-sans">
+    <!-- Navigation -->
+    {% include 'core/partials/navbar.html' %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    {% include 'core/partials/footer.html' %}
+    
+    <!-- JavaScript -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Enhanced navbar functionality matching original Next.js behavior
+        let isScrolled = false;
+        let isMobileMenuOpen = false;
+        
+        function updateNavbarState() {
+            const navbar = document.getElementById('navbar');
+            const isHomePage = document.body.classList.contains('home-page');
+            
+            if (window.scrollY > 10) {
+                if (!isScrolled) {
+                    navbar.classList.add('scrolled');
+                    isScrolled = true;
+                }
+            } else {
+                if (isScrolled) {
+                    navbar.classList.remove('scrolled');
+                    isScrolled = false;
+                }
+            }
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', updateNavbarState);
+        
+        // Initialize navbar state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavbarState();
+        });
+        
+        // Mobile menu toggle with icon switching
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+            
+            isMobileMenuOpen = !isMobileMenuOpen;
+            
+            if (isMobileMenuOpen) {
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('show');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('show');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+            
+            // Re-initialize Lucide icons after DOM changes
+            lucide.createIcons();
+        }
+        
+        // Close mobile menu when clicking on a link
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#mobile-menu a')) {
+                toggleMobileMenu();
+            }
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (isMobileMenuOpen && !e.target.closest('#navbar')) {
+                toggleMobileMenu();
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768 && isMobileMenuOpen) {
+                toggleMobileMenu();
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

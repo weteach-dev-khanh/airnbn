@@ -1,0 +1,16 @@
+Các hình ảnh cần tạo cho khóa học:
+
+1. airbnb-hosting.jpg - Hình ảnh về quản lý Airbnb
+2. photography.jpg - Hình ảnh về chụp ảnh bất động sản
+3. interior-design.jpg - Hình ảnh về thiết kế nội thất
+4. business-management.jpg - Hình ảnh về quản lý kinh doanh
+5. marketing.jpg - Hình ảnh về marketing
+6. customer-service.jpg - Hình ảnh về chăm sóc khách hàng
+
+Các hình ảnh nên có kích thước tối thiểu 800x600px và tỷ lệ 4:3 để hiển thị đẹp.
+Bạn có thể sử dụng các hình ảnh từ:
+- Unsplash.com
+- Pexels.com
+- Pixabay.com
+
+Sau khi có hình ảnh, hãy lưu với tên file tương ứng vào thư mục này và xóa file placeholder.txt 
