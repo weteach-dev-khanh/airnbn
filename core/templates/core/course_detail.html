@@ -22,9 +22,19 @@
                         <div class="bg-white rounded-xl shadow-md overflow-hidden"
                               style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
                               <div class="relative h-[400px] w-full">
-                                    <img src="{{ course.image }}" alt="{{ course.title }}"
-                                          class="w-full h-full object-cover"
-                                          onerror="this.src='https://via.placeholder.com/800x400/e5e7eb/6b7280?text=Course+Image'">
+                                    {% if course.image %}
+                                        <img src="{{ course.image.url }}" alt="{{ course.title }}"
+                                              class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <div class="text-center text-gray-500">
+                                                <svg class="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                                                </svg>
+                                                <p>Không có ảnh</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                               </div>
                               <div class="p-6">
                                     <h1
@@ -41,7 +51,7 @@
                                     Nội dung khóa học
                               </h2>
                               <div class="space-y-4">
-                                    {% for item in course.curriculum %}
+                                    {% for item in course.curriculum_items.all %}
                                     <div
                                           class="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                           <span
@@ -49,7 +59,7 @@
                                                 {{ forloop.counter }}
                                           </span>
                                           <div>
-                                                <p class="text-gray-800 font-medium">{{ item }}</p>
+                                                <p class="text-gray-800 font-medium">{{ item.title }}</p>
                                           </div>
                                     </div>
                                     {% endfor %}
@@ -62,7 +72,7 @@
                                     Bạn sẽ nhận được gì?
                               </h2>
                               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {% for feature in course.features %}
+                                    {% for feature in course.features.all %}
                                     <div
                                           class="flex items-start p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                           <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none"
@@ -70,7 +80,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M5 13l4 4L19 7" />
                                           </svg>
-                                          <p class="text-gray-700">{{ feature }}</p>
+                                          <p class="text-gray-700">{{ feature.title }}</p>
                                     </div>
                                     {% endfor %}
                               </div>
@@ -85,7 +95,7 @@
                                     <div class="space-y-4">
                                           <div class="flex items-center justify-between">
                                                 <span class="text-gray-600">Giá khóa học</span>
-                                                <span class="text-2xl font-bold text-black">{{ course.price }}
+                                                <span class="text-2xl font-bold text-black">{{ course.get_price_display }}
                                                       VND</span>
                                           </div>
                                           <button onclick="openEnrollmentModal()"
@@ -113,7 +123,7 @@
                                                 </svg>
                                                 <div>
                                                       <p class="text-sm text-gray-500">Giảng viên</p>
-                                                      <p class="font-medium">{{ course.instructor }}</p>
+                                                      <p class="font-medium">{{ course.instructor.name }}</p>
                                                 </div>
                                           </div>
                                           <div class="flex items-center text-gray-600">
@@ -137,7 +147,7 @@
                                                 </svg>
                                                 <div>
                                                       <p class="text-sm text-gray-500">Học viên đăng ký</p>
-                                                      <p class="font-medium">{{ course.students|floatformat:0 }}</p>
+                                                      <p class="font-medium">{{ course.students_count|floatformat:0 }}</p>
                                                 </div>
                                           </div>
                                     </div>

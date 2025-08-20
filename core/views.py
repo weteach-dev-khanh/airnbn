@@ -1,183 +1,19 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 import json
 from datetime import datetime
 from .models import (
     AirbnbListing, PropertyType, Location,
-    BlogPost, BlogCategory, BlogAuthor, Booking, CourseEnrollment
+    BlogPost, BlogCategory, BlogAuthor, BlogPostSection, Booking, CourseEnrollment,
+    Course, CourseInstructor, CourseCurriculumItem, CourseFeature
 )
-
-# Course data (static - no models needed)
-COURSE_LISTINGS = [
-    {
-        'id': 1,
-        'slug': 'complete-airbnb-hosting',
-        'title': 'Khóa Học Toàn Diện về Kinh Doanh Airbnb',
-        'instructor': 'Nguyễn Văn A',
-        'price': '2,990,000',
-        'duration': '8 weeks',
-        'image': '/static/core/images/courses/image.jpg',
-        'students': 1234,
-    },
-    {
-        'id': 2,
-        'slug': 'airbnb-photography',
-        'title': 'Chụp Ảnh Chuyên Nghiệp cho Airbnb',
-        'instructor': 'Nguyễn Việt Anh',
-        'price': '1,490,000',
-        'duration': '4 weeks',
-        'image': '/static/core/images/courses/image1.jpg',
-        'students': 856,
-    },
-    {
-        'id': 3,
-        'slug': 'airbnb-interior-design',
-        'title': 'Thiết Kế Nội Thất cho Airbnb',
-        'instructor': 'Lê Văn C',
-        'price': '2,490,000',
-        'duration': '6 weeks',
-        'image': '/static/core/images/courses/image2.jpg',
-        'students': 945,
-    },
-    {
-        'id': 4,
-        'slug': 'airbnb-business-management',
-        'title': 'Quản Lý Kinh Doanh Airbnb Hiệu Quả',
-        'instructor': 'Phạm Thị D',
-        'price': '3,490,000',
-        'duration': '10 weeks',
-        'image': '/static/core/images/courses/image3.jpg',
-        'students': 678,
-    },
-    {
-        'id': 5,
-        'slug': 'airbnb-marketing',
-        'title': 'Marketing cho Airbnb',
-        'instructor': 'Hoàng Văn E',
-        'price': '1,990,000',
-        'duration': '5 weeks',
-        'image': '/static/core/images/courses/image4.jpg',
-        'students': 1023,
-    },
-    {
-        'id': 6,
-        'slug': 'airbnb-customer-service',
-        'title': 'Kỹ Năng Chăm Sóc Khách Hàng',
-        'instructor': 'Vũ Thị F',
-        'price': '1,490,000',
-        'duration': '4 weeks',
-        'image': '/static/core/images/courses/image5.jpg',
-        'students': 567,
-    },
-]
-
-COURSE_DETAILS = {
-    'complete-airbnb-hosting': {
-        'description': 'Khóa học toàn diện giúp bạn xây dựng và vận hành thành công doanh nghiệp Airbnb của mình. Từ việc setup căn hộ đến quản lý đặt phòng và tối ưu doanh thu.',
-        'curriculum': [
-            'Giới thiệu về Airbnb',
-            'Chuẩn bị và setup căn hộ',
-            'Chụp ảnh và viết mô tả listing',
-            'Định giá và chiến lược kinh doanh',
-            'Quản lý đặt phòng và giao tiếp với khách',
-            'Tối ưu doanh thu và mở rộng kinh doanh',
-        ],
-        'features': [
-            'Video bài giảng HD',
-            'Tài liệu PDF chi tiết',
-            'Group hỗ trợ riêng',
-            'Chứng chỉ hoàn thành',
-        ],
-    },
-    'airbnb-photography': {
-        'description': 'Học cách chụp ảnh chuyên nghiệp cho listing Airbnb của bạn. Khóa học cung cấp kỹ thuật chụp ảnh, chỉnh sửa và tối ưu hình ảnh để thu hút khách hàng.',
-        'curriculum': [
-            'Cơ bản về nhiếp ảnh',
-            'Thiết bị và setup',
-            'Kỹ thuật chụp ảnh nội thất',
-            'Chụp ảnh góc rộng',
-            'Chỉnh sửa ảnh cơ bản',
-            'Tối ưu hình ảnh cho Airbnb',
-        ],
-        'features': [
-            'Video hướng dẫn chi tiết',
-            'Thực hành với giảng viên',
-            'Feedback 1-1',
-            'Bộ preset chỉnh ảnh',
-        ],
-    },
-    'airbnb-interior-design': {
-        'description': 'Khám phá nghệ thuật thiết kế nội thất cho căn hộ Airbnb. Học cách tạo không gian đẹp, tiện nghi và ấn tượng với ngân sách tối ưu.',
-        'curriculum': [
-            'Nguyên lý thiết kế cơ bản',
-            'Lựa chọn màu sắc và vật liệu',
-            'Thiết kế phòng ngủ',
-            'Thiết kế phòng khách',
-            'Thiết kế phòng tắm',
-            'Trang trí và phụ kiện',
-        ],
-        'features': [
-            'Mẫu thiết kế có sẵn',
-            'Tư vấn 1-1 với chuyên gia',
-            'Danh sách nhà cung cấp',
-            'Hướng dẫn shopping tour',
-        ],
-    },
-    'airbnb-business-management': {
-        'description': 'Học cách quản lý hiệu quả doanh nghiệp Airbnb của bạn. Từ vận hành hàng ngày đến chiến lược phát triển dài hạn.',
-        'curriculum': [
-            'Xây dựng mô hình kinh doanh',
-            'Quản lý vận hành',
-            'Quản lý tài chính',
-            'Quản lý nhân sự',
-            'Marketing và bán hàng',
-            'Phát triển quy mô',
-        ],
-        'features': [
-            'Template quản lý',
-            'Phần mềm tracking',
-            'Tư vấn kinh doanh',
-            'Network doanh nghiệp',
-        ],
-    },
-    'airbnb-marketing': {
-        'description': 'Chiến lược marketing toàn diện cho Airbnb. Từ SEO đến social media và email marketing để tăng booking và doanh thu.',
-        'curriculum': [
-            'Xây dựng thương hiệu',
-            'SEO cho Airbnb',
-            'Social Media Marketing',
-            'Email Marketing',
-            'Content Marketing',
-            'Quảng cáo online',
-        ],
-        'features': [
-            'Công cụ marketing',
-            'Template content',
-            'Case study thực tế',
-            'Group chia sẻ kinh nghiệm',
-        ],
-    },
-    'airbnb-customer-service': {
-        'description': 'Nâng cao kỹ năng chăm sóc khách hàng cho host Airbnb. Học cách xử lý tình huống và tạo trải nghiệm tuyệt vời cho khách.',
-        'curriculum': [
-            'Nguyên tắc giao tiếp',
-            'Kỹ năng lắng nghe',
-            'Xử lý khiếu nại',
-            'Tạo trải nghiệm khách hàng',
-            'Xây dựng loyalty',
-            'Quản lý review',
-        ],
-        'features': [
-            'Role-play thực tế',
-            'Script mẫu',
-            'Hướng dẫn xử lý tình huống',
-            'Chứng chỉ nghiệp vụ',
-        ],
-    },
-}
+from .forms import CustomLoginForm
 
 def home(request):
     """Home page view"""
@@ -247,34 +83,25 @@ def airbnb_detail(request, slug):
 
 def courses(request):
     """Courses page"""
+    courses = Course.objects.filter(active=True).select_related('instructor').order_by('-created_at')
+    
     context = {
-        'courses': COURSE_LISTINGS
+        'courses': courses
     }
     return render(request, 'core/courses.html', context)
 
 def course_detail(request, slug):
     """Individual course detail page"""
-    # Find course by slug
-    course = None
-    for c in COURSE_LISTINGS:
-        if c['slug'] == slug:
-            course = c
-            break
-    
-    if not course:
-        # Return 404 if course not found
-        from django.http import Http404
-        raise Http404("Course not found")
-    
-    # Get course details
-    details = COURSE_DETAILS.get(slug, {})
-    
-    # Merge course data with details
-    course_data = course.copy()
-    course_data.update(details)
+    course = get_object_or_404(
+        Course.objects.select_related('instructor').prefetch_related(
+            'curriculum_items', 'features'
+        ),
+        slug=slug,
+        active=True
+    )
     
     context = {
-        'course': course_data
+        'course': course
     }
     return render(request, 'core/course_detail.html', context)
 
@@ -302,7 +129,7 @@ def blog(request):
 def blog_detail(request, slug):
     """Individual blog post detail page"""
     post = get_object_or_404(
-        BlogPost.objects.select_related('category', 'author'),
+        BlogPost.objects.select_related('category', 'author').prefetch_related('sections'),
         slug=slug,
         published=True
     )
@@ -326,6 +153,39 @@ def careers(request):
 def contact(request):
     """Contact page"""
     return render(request, 'core/contact.html')
+
+
+def user_login(request):
+    """Login page"""
+    if request.user.is_authenticated:
+        return redirect('core:home')
+    
+    if request.method == 'POST':
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Chào mừng {user.first_name or user.username}!')
+                next_url = request.GET.get('next', 'core:home')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Tên đăng nhập hoặc mật khẩu không đúng.')
+        else:
+            messages.error(request, 'Vui lòng kiểm tra lại thông tin đăng nhập.')
+    else:
+        form = CustomLoginForm()
+    
+    return render(request, 'core/login.html', {'form': form})
+
+
+def user_logout(request):
+    """Logout view"""
+    logout(request)
+    messages.success(request, 'Bạn đã đăng xuất thành công.')
+    return redirect('core:home')
 
 
 @csrf_exempt
@@ -383,6 +243,7 @@ def create_booking(request):
 def create_course_enrollment(request):
     """API endpoint to create a course enrollment"""
     try:
+        import json
         data = json.loads(request.body)
         
         # Validate required fields
@@ -394,9 +255,9 @@ def create_course_enrollment(request):
                     'error': f'Trường {field} là bắt buộc'
                 }, status=400)
         
-        # Validate course exists in our static data
-        course_exists = any(c['slug'] == data['course_slug'] for c in COURSE_LISTINGS)
-        if not course_exists:
+        # Validate course exists in database
+        course = Course.objects.filter(slug=data['course_slug'], active=True).first()
+        if not course:
             return JsonResponse({
                 'success': False,
                 'error': 'Khóa học không tồn tại'

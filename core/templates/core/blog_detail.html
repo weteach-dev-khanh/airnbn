@@ -1,6 +1,5 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% load markdown_extras %}
 
 {% block title %}{{ post.title }} - Blog{% endblock %}
 
@@ -66,9 +65,38 @@
         </div>
         {% endif %}
 
-        <!-- Content -->
-        <div class="prose prose-lg max-w-none mb-12">
-            {{ post.get_content|markdown_to_html }}
+        <!-- Content Sections -->
+        <div class="space-y-12 mb-12">
+            {% for section in post.sections.all %}
+                <section class="blog-section">
+                    {% if section.title %}
+                        <h2 class="text-2xl font-bold mb-6 text-gray-900">
+                            {{ section.title }}
+                        </h2>
+                    {% endif %}
+                    
+                    {% if section.image %}
+                        <div class="mb-6">
+                            <div class="relative rounded-lg overflow-hidden"
+                                 style="box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                                <img src="{{ section.image.url }}" 
+                                     alt="{{ section.title|default:'Section image' }}"
+                                     class="w-full h-auto object-cover">
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if section.content %}
+                        <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                            {{ section.content|linebreaks }}
+                        </div>
+                    {% endif %}
+                </section>
+            {% empty %}
+                <div class="text-center text-gray-500 py-12">
+                    <p>Chưa có nội dung cho bài viết này.</p>
+                </div>
+            {% endfor %}
         </div>
 
         <!-- Tags -->

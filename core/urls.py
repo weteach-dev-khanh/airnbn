@@ -14,6 +14,10 @@ urlpatterns = [
     path('careers/', views.careers, name='careers'),
     path('contact/', views.contact, name='contact'),
     
+    # Authentication
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
+    
     # API endpoints
     path('api/booking/create/', views.create_booking, name='create_booking'),
     path('api/course-enrollment/create/', views.create_course_enrollment, name='create_course_enrollment'),

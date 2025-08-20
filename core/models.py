@@ -1,15 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
-from django.core.exceptions import ValidationError
-import os
-
-def validate_markdown_file(value):
-    """Validate that the uploaded file is a markdown file"""
-    ext = os.path.splitext(value.name)[1]
-    valid_extensions = ['.md', '.markdown']
-    if not ext.lower() in valid_extensions:
-        raise ValidationError('Only markdown files (.md, .markdown) are allowed.')
+from django.contrib.auth.models import User
 
 class PropertyType(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -161,12 +153,7 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     excerpt = models.TextField(help_text="Short description of the post")
-    content_file = models.FileField(
-        upload_to='blog/content/', 
-        validators=[validate_markdown_file],
-        help_text="Upload markdown file (.md or .markdown)"
-    )
-    image = models.ImageField(upload_to='blog/posts/')
+    image = models.ImageField(upload_to='blog/posts/', help_text="Main featured image for the blog post")
     category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, related_name='posts')
     author = models.ForeignKey(BlogAuthor, on_delete=models.CASCADE, related_name='posts')
     tags = models.CharField(max_length=500, help_text="Comma-separated tags")
@@ -191,31 +178,6 @@ class BlogPost(models.Model):
     def get_tags_list(self):
         return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
     
-    def get_content(self):
-        """Load markdown content from uploaded file"""
-        if not self.content_file:
-            return ""
-        
-        try:
-            # Use the file path directly with proper encoding
-            with open(self.content_file.path, 'r', encoding='utf-8') as file:
-                return file.read()
-        except FileNotFoundError:
-            return f"Markdown file not found."
-        except UnicodeDecodeError:
-            # Try with different encoding if UTF-8 fails
-            try:
-                with open(self.content_file.path, 'r', encoding='utf-8-sig') as file:
-                    return file.read()
-            except UnicodeDecodeError:
-                try:
-                    with open(self.content_file.path, 'r', encoding='latin-1') as file:
-                        return file.read()
-                except:
-                    return "Could not decode file. Please ensure the file is saved in UTF-8 encoding."
-        except Exception as e:
-            return f"Error loading content: {str(e)}"
-    
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
@@ -224,6 +186,104 @@ class BlogPost(models.Model):
             self.published_date = timezone.now()
         super().save(*args, **kwargs)
 
+
+class BlogPostSection(models.Model):
+    blog_post = models.ForeignKey(BlogPost, related_name='sections', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200, help_text="Section title")
+    image = models.ImageField(upload_to='blog/sections/', blank=True, null=True, help_text="Optional section image")
+    content = models.TextField(help_text="Section content/paragraph")
+    order = models.PositiveIntegerField(default=0, help_text="Order of this section in the blog post")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = "Blog Post Section"
+        verbose_name_plural = "Blog Post Sections"
+    
+    def __str__(self):
+        return f"{self.blog_post.title} - {self.title}"
+
+
+
+# Course Models
+class CourseInstructor(models.Model):
+    name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True)
+    avatar = models.ImageField(upload_to='course/instructors/', blank=True, null=True)
+    email = models.EmailField(blank=True)
+    website = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Course Instructor"
+        verbose_name_plural = "Course Instructors"
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = models.TextField()
+    instructor = models.ForeignKey(CourseInstructor, on_delete=models.CASCADE, related_name='courses')
+    price = models.DecimalField(max_digits=10, decimal_places=0, help_text="Price in VND")
+    duration = models.CharField(max_length=50, help_text="e.g., '8 weeks', '4 weeks'")
+    image = models.ImageField(upload_to='courses/')
+    students_count = models.PositiveIntegerField(default=0, help_text="Number of enrolled students")
+    featured = models.BooleanField(default=False, help_text="Show on homepage")
+    active = models.BooleanField(default=True)
+    enrolled_users = models.ManyToManyField(User, related_name='enrolled_courses', blank=True, help_text="Users enrolled in this course")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        return reverse('core:course_detail', kwargs={'slug': self.slug})
+    
+    def get_price_display(self):
+        return f"{self.price:,.0f}"
+    
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        verbose_name = "Course"
+        verbose_name_plural = "Courses"
+        ordering = ['-created_at']
+
+
+class CourseCurriculumItem(models.Model):
+    course = models.ForeignKey(Course, related_name='curriculum_items', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
+    
+    class Meta:
+        verbose_name = "Course Curriculum Item"
+        verbose_name_plural = "Course Curriculum Items"
+        ordering = ['order']
+
+
+class CourseFeature(models.Model):
+    course = models.ForeignKey(Course, related_name='features', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
+    
+    class Meta:
+        verbose_name = "Course Feature"
+        verbose_name_plural = "Course Features"
+        ordering = ['order']
 
 
 # Booking Models

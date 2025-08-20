@@ -51,6 +51,40 @@
                         aria-label="Search">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
+                
+                {% if user.is_authenticated %}
+                    <!-- User dropdown -->
+                    <div class="relative">
+                        <button id="user-menu-btn"
+                                class="flex items-center space-x-2 p-2 rounded-full transition-colors text-white hover:bg-white/10"
+                                onclick="toggleUserMenu()">
+                            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-sm font-medium">{{ user.first_name|default:user.username }}</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <!-- Dropdown menu -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="{% url 'core:profile' %}" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                Hồ sơ cá nhân
+                            </a>
+                            <a href="{% url 'core:logout' %}" 
+                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'core:login' %}"
+                       id="login-btn"
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all text-white border border-white hover:bg-white hover:text-black">
+                        Đăng nhập
+                    </a>
+                {% endif %}
+                
                 <a href="{% url 'core:contact' %}"
                    id="contact-btn"
                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all text-black bg-white hover:bg-gray-100"
@@ -105,6 +139,26 @@
                 <i data-lucide="search" class="w-5 h-5 text-gray-700 mr-2"></i>
                 <span class="text-gray-600">Tìm kiếm</span>
             </div>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'core:profile' %}"
+                   class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+                   style="letter-spacing: 0.3px;">
+                    Hồ sơ cá nhân
+                </a>
+                <a href="{% url 'core:logout' %}"
+                   class="block px-3 py-2 text-gray-800 hover:bg-gray-100 hover:text-black rounded-md transition-all"
+                   style="letter-spacing: 0.3px;">
+                    Đăng xuất
+                </a>
+            {% else %}
+                <a href="{% url 'core:login' %}"
+                   class="block px-3 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-md text-center mx-3 mt-2 transition-all"
+                   style="letter-spacing: 0.3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    Đăng nhập
+                </a>
+            {% endif %}
+            
             <a href="{% url 'core:contact' %}"
                class="block px-3 py-2 text-sm font-medium text-white bg-black hover:bg-gray-800 rounded-md text-center mx-3 mt-2 transition-all"
                style="letter-spacing: 0.3px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -209,6 +263,36 @@ body:not(.home-page) #navbar #mobile-menu-btn:hover {
     background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Styles for login button on non-home pages */
+body:not(.home-page) #navbar #login-btn {
+    color: #374151 !important;
+    border-color: #374151 !important;
+}
+
+body:not(.home-page) #navbar #login-btn:hover {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+/* User menu styles for scrolled navbar */
+#navbar.scrolled #user-menu-btn {
+    color: #374151 !important;
+}
+
+#navbar.scrolled #user-menu-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+#navbar.scrolled #login-btn {
+    color: #374151 !important;
+    border-color: #374151 !important;
+}
+
+#navbar.scrolled #login-btn:hover {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
 /* Mobile menu animation */
 #mobile-menu {
     transition: all 0.3s ease-in-out;
@@ -218,3 +302,32 @@ body:not(.home-page) #navbar #mobile-menu-btn:hover {
     display: block;
 }
 </style>
+
+<script>
+// Toggle mobile menu
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenu.classList.toggle('hidden');
+    menuIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+}
+
+// Toggle user dropdown menu
+function toggleUserMenu() {
+    const userMenu = document.getElementById('user-menu');
+    userMenu.classList.toggle('hidden');
+}
+
+// Close user menu when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userMenu = document.getElementById('user-menu');
+    
+    if (userMenuBtn && userMenu && !userMenuBtn.contains(event.target) && !userMenu.contains(event.target)) {
+        userMenu.classList.add('hidden');
+    }
+});
+</script>

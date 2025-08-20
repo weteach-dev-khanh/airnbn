@@ -1,47 +1,54 @@
 from django import template
 from django.utils.safestring import mark_safe
-import markdown
 import re
 
 register = template.Library()
 
 @register.filter
-def markdown_to_html(value):
-    """Convert markdown text to HTML"""
+def truncate_words_html(value, arg):
+    """
+    Truncates HTML after a certain number of words, preserving HTML tags
+    """
     if not value:
         return ""
     
-    # Configure markdown with extensions
-    md = markdown.Markdown(
-        extensions=[
-            'markdown.extensions.extra',
-            'markdown.extensions.codehilite',
-            'markdown.extensions.toc',
-            'markdown.extensions.nl2br',
-        ],
-        extension_configs={
-            'markdown.extensions.codehilite': {
-                'css_class': 'highlight',
-                'use_pygments': False,
-            }
-        }
-    )
+    try:
+        length = int(arg)
+    except ValueError:
+        return value
     
-    # Convert markdown to HTML
-    html = md.convert(value)
+    # Simple word counting that ignores HTML tags
+    import re
+    text_content = re.sub(r'<[^>]*>', '', str(value))
+    words = text_content.split()
     
-    # Add custom classes to elements for better styling
-    html = re.sub(r'<h1>', '<h1 class="text-4xl font-bold mb-8 mt-12 bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-black">', html)
-    html = re.sub(r'<h2>', '<h2 class="text-3xl font-bold mb-6 mt-10 text-gray-900">', html)
-    html = re.sub(r'<h3>', '<h3 class="text-2xl font-semibold mb-4 mt-8 text-gray-900">', html)
-    html = re.sub(r'<p>', '<p class="text-lg leading-relaxed mb-6 text-gray-600">', html)
-    html = re.sub(r'<ul>', '<ul class="list-disc list-inside space-y-3 mb-6">', html)
-    html = re.sub(r'<ol>', '<ol class="list-decimal list-inside space-y-3 mb-6">', html)
-    html = re.sub(r'<li>', '<li class="text-gray-600">', html)
-    html = re.sub(r'<blockquote>', '<blockquote class="border-l-4 border-black pl-4 italic my-6 text-gray-700 bg-gray-50 py-2 px-4 rounded-r-lg">', html)
-    html = re.sub(r'<pre>', '<pre class="bg-gray-900 text-gray-100 p-4 my-6 overflow-x-auto rounded-lg" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">', html)
-    html = re.sub(r'<code>', '<code class="bg-gray-100 rounded px-1 py-0.5 text-black">', html)
-    html = re.sub(r'<img([^>]*)>', r'<img\1 class="w-full h-auto rounded-xl shadow-lg my-8" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1);">', html)
-    html = re.sub(r'<a([^>]*)>', r'<a\1 class="text-black font-medium hover:underline">', html)
+    if len(words) <= length:
+        return value
     
-    return mark_safe(html)
+    # Find the position after the nth word in the original HTML
+    word_count = 0
+    result = ""
+    i = 0
+    in_tag = False
+    
+    while i < len(value) and word_count < length:
+        char = value[i]
+        result += char
+        
+        if char == '<':
+            in_tag = True
+        elif char == '>':
+            in_tag = False
+        elif not in_tag and char.isspace():
+            # Count words only outside of tags
+            if i + 1 < len(value) and not value[i + 1].isspace():
+                word_count += 1
+        
+        i += 1
+    
+    return mark_safe(result + "...")
+
+@register.filter  
+def add_class(field, css_class):
+    """Add CSS class to form field"""
+    return field.as_widget(attrs={"class": css_class})
