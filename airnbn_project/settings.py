@@ -150,11 +150,13 @@ STATICFILES_DIRS = [
 
 # Static files configuration for Vercel
 if not DEBUG:
-    # Production - use WhiteNoise with optimizations
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Production - use WhiteNoise without manifest for debugging
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
     # Add cache control for static files
     WHITENOISE_MAX_AGE = 31536000  # 1 year
     WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
 else:
     # Development
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
