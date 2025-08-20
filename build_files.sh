@@ -5,7 +5,7 @@ echo "Starting Vercel build..."
 
 # Install requirements
 echo "Installing dependencies..."
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # Collect static files
 echo "Collecting static files..."
