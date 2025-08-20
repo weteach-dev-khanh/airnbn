@@ -212,7 +212,7 @@ class CourseInstructorAdmin(admin.ModelAdmin):
 class CourseCurriculumItemInline(admin.TabularInline):
     model = CourseCurriculumItem
     extra = 1
-    fields = ['title', 'order']
+    fields = ['title', 'youtube_link', 'order']
 
 
 class CourseFeatureInline(admin.TabularInline):
@@ -266,10 +266,13 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(CourseCurriculumItem)
 class CourseCurriculumItemAdmin(admin.ModelAdmin):
-    list_display = ['course', 'title', 'order']
+    list_display = ['course', 'title', 'youtube_link', 'order']
     list_filter = ['course']
     search_fields = ['course__title', 'title']
     ordering = ['course', 'order']
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('course')
 
 
 @admin.register(CourseFeature)

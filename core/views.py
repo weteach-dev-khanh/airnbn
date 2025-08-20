@@ -100,8 +100,14 @@ def course_detail(request, slug):
         active=True
     )
     
+    # Check if user is enrolled in this course
+    user_enrolled = False
+    if request.user.is_authenticated:
+        user_enrolled = course.enrolled_users.filter(id=request.user.id).exists()
+    
     context = {
-        'course': course
+        'course': course,
+        'user_enrolled': user_enrolled
     }
     return render(request, 'core/course_detail.html', context)
 

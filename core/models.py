@@ -261,6 +261,7 @@ class Course(models.Model):
 class CourseCurriculumItem(models.Model):
     course = models.ForeignKey(Course, related_name='curriculum_items', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
+    youtube_link = models.URLField(blank=True, null=True, help_text="YouTube video link for this curriculum item")
     order = models.PositiveIntegerField(default=0)
     
     def __str__(self):

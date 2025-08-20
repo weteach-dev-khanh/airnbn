@@ -58,8 +58,23 @@
                                                 class="flex items-center justify-center w-8 h-8 bg-black text-white rounded-full mr-4 font-semibold">
                                                 {{ forloop.counter }}
                                           </span>
-                                          <div>
+                                          <div class="flex-1">
                                                 <p class="text-gray-800 font-medium">{{ item.title }}</p>
+                                                {% if user_enrolled and item.youtube_link %}
+                                                <div class="mt-2">
+                                                      <button onclick="openVideoModal('{{ item.youtube_link }}', '{{ item.title }}')"
+                                                            class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                                                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                                                  <path d="M8 5v14l11-7z"/>
+                                                            </svg>
+                                                            Xem video bài học
+                                                      </button>
+                                                </div>
+                                                {% elif not user.is_authenticated %}
+                                                <p class="text-sm text-gray-500 mt-1">Đăng nhập để xem nội dung video</p>
+                                                {% elif not user_enrolled %}
+                                                <p class="text-sm text-gray-500 mt-1">Đăng ký khóa học để xem video</p>
+                                                {% endif %}
                                           </div>
                                     </div>
                                     {% endfor %}
@@ -352,6 +367,38 @@
       </div>
 </div>
 
+<!-- Video Modal -->
+<div id="videoModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden">
+      <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full relative"
+                  style="box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+                  <!-- Close Button -->
+                  <button onclick="closeVideoModal()"
+                        class="absolute top-4 right-4 z-10 bg-black bg-opacity-70 hover:bg-opacity-90 text-white transition-colors rounded-full p-2 shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                  </button>
+
+                  <!-- Video Title -->
+                  <div class="p-4 border-b border-gray-200">
+                        <h3 id="videoTitle" class="text-xl font-semibold text-gray-900"></h3>
+                  </div>
+
+                  <!-- Video Container -->
+                  <div class="relative w-full" style="padding-bottom: 56.25%; /* 16:9 aspect ratio */">
+                        <iframe id="videoFrame" 
+                              class="absolute top-0 left-0 w-full h-full"
+                              frameborder="0" 
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                              allowfullscreen>
+                        </iframe>
+                  </div>
+            </div>
+      </div>
+</div>
+
 <script>
       // Course enrollment modal functionality
       function openEnrollmentModal() {
@@ -487,6 +534,64 @@
       document.getElementById('enrollmentModal').addEventListener('click', function (e) {
             if (e.target === this) {
                   closeEnrollmentModal();
+            }
+      });
+
+      // Video modal functionality
+      function openVideoModal(youtubeUrl, title) {
+            // Extract video ID from YouTube URL
+            const videoId = extractYouTubeVideoId(youtubeUrl);
+            if (!videoId) {
+                  alert('URL YouTube không hợp lệ');
+                  return;
+            }
+
+            // Set video title
+            document.getElementById('videoTitle').textContent = title;
+
+            // Set iframe src with YouTube embed URL
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            document.getElementById('videoFrame').src = embedUrl;
+
+            // Show modal
+            document.getElementById('videoModal').classList.remove('hidden');
+      }
+
+      function closeVideoModal() {
+            // Hide modal
+            document.getElementById('videoModal').classList.add('hidden');
+            
+            // Stop video by clearing iframe src
+            document.getElementById('videoFrame').src = '';
+      }
+
+      function extractYouTubeVideoId(url) {
+            // Handle various YouTube URL formats
+            const patterns = [
+                  /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+                  /^([a-zA-Z0-9_-]{11})$/ // Direct video ID
+            ];
+
+            for (const pattern of patterns) {
+                  const match = url.match(pattern);
+                  if (match) {
+                        return match[1];
+                  }
+            }
+            return null;
+      }
+
+      // Close video modal when clicking outside
+      document.getElementById('videoModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                  closeVideoModal();
+            }
+      });
+
+      // Close video modal when pressing Escape key
+      document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                  closeVideoModal();
             }
       });
 </script>
