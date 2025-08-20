@@ -123,7 +123,7 @@
                     <a href="tel:{{ listing.phone }}"
                         class="block w-full bg-green-600 text-white text-center py-3 rounded-md hover:bg-green-700 transition-all"
                         style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        Call Host
+                        {{ listing.phone }}
                     </a>
                     {% endif %}
 
@@ -289,8 +289,8 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Đặt phòng thành công!</h3>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Host Line: 0123456789</h3>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Email: test@gmail.com</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Host Line: {{ listing.phone }}</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Email:contact@nguyenvietanh.com</h3>
                 <p class="text-gray-600 mb-6">
                     Chúng tôi đã nhận được thông tin đặt phòng của bạn, nhân viên sẽ liên hệ bạn trong thời gian sớm
                     nhất.
