@@ -1,20 +1,11 @@
 {
-  "version": 2,
-  "builds": [
-    {
-        "src": "build_files.sh",
-        "use": "@vercel/static-build",
-        "config": {
-            "distDir": "dist"
-        }
-    },
+    "builds": [
     {
         "src": "airnbn_project/wsgi.py",
-        "use": "@vercel/python",
-        "config": { "maxLambdaSize": "15mb", "runtime": "python3.9" }
+        "use": "@vercel/python"
     }
-  ],
-  "routes": [
+    ],
+    "routes": [
     {
         "src": "/static/(.*)",
         "dest": "/static/$1"
@@ -23,5 +14,5 @@
         "src": "/(.*)",
         "dest": "airnbn_project/wsgi.py"
     }
-  ]
+    ]
 }
