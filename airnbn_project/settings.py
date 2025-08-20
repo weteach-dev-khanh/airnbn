@@ -141,12 +141,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Static files directories
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+# Static files configuration
+if DEBUG:
+    # Development
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+else:
+    # Production - Vercel
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
 
 # Static files configuration for Vercel
 if not DEBUG:
@@ -162,15 +170,10 @@ else:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Media files configuration
-if DEBUG:
-    # Local development - use local storage
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-else:
-    # Production - use Vercel Blob Storage
-    DEFAULT_FILE_STORAGE = 'core.storage_backends.VercelBlobStorage'
-    MEDIA_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com' + '/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Vercel Blob Storage settings
 VERCEL_BLOB_BASE_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com'
