@@ -47,7 +47,8 @@ BLOB_READ_WRITE_TOKEN=your-blob-token
 ### 1. Prepare Your Repository
 
 1. Ensure all files are committed to your GitHub repository
-2. Make sure `vercel.json`, `build_files.sh`, and `requirements.txt` are in the root directory
+2. Make sure `vercel.json` and `requirements.txt` are in the root directory
+3. The `build_files.sh` is not needed - Vercel will handle the build automatically
 
 ### 2. Setup Supabase Database
 
@@ -69,25 +70,24 @@ BLOB_READ_WRITE_TOKEN=your-blob-token
 4. Add all the environment variables listed above
 5. Click "Deploy"
 
-### 5. Run Database Migrations
+### 5. Post-Deployment Steps
 
-After the first deployment, you need to run migrations. You can do this by:
+After the first deployment:
 
-1. Using Vercel CLI:
+1. Go to your Vercel project dashboard
+2. Navigate to the Functions tab to see if the deployment was successful
+3. If you need to run migrations manually, you can use the Vercel CLI:
    ```bash
-   vercel --prod
-   vercel exec -- python manage.py migrate
+   npm i -g vercel
+   vercel login
+   vercel link
+   vercel env pull .env.production
+   vercel dev
    ```
-
-2. Or by triggering a redeploy after setting up the database
 
 ### 6. Create Superuser (Optional)
 
-To create an admin user:
-
-```bash
-vercel exec -- python manage.py createsuperuser
-```
+To create an admin user, you'll need to do this through a management command or directly in your Supabase database.
 
 ## File Structure
 
@@ -130,10 +130,40 @@ Migrations are automatically run during the Vercel build process via the `build_
 
 ### Common Issues
 
-1. **Build Failures**: Check that all dependencies are in `requirements.txt`
-2. **Database Connection**: Verify Supabase connection strings
-3. **Static Files**: Ensure `STATIC_ROOT` path is correct
-4. **Media Files**: Check Vercel Blob Storage token and URL
+1. **Build Failures**: 
+   - Check that all dependencies are in `requirements.txt`
+   - Ensure Python version compatibility (Python 3.9)
+   - Verify all environment variables are set
+
+2. **Database Connection**: 
+   - Verify Supabase connection strings
+   - Check that the database is accessible from Vercel's servers
+   - Ensure password and host are correct
+
+3. **Static Files**: 
+   - Vercel handles static files automatically with WhiteNoise
+   - Make sure `STATIC_ROOT` path is correct
+
+4. **Media Files**: 
+   - Check Vercel Blob Storage token and URL
+   - Verify the custom storage backend is working
+
+5. **Migrations**:
+   - Run migrations manually using Vercel CLI if needed:
+     ```bash
+     vercel env pull .env.production
+     python manage.py migrate
+     ```
+
+### Running Migrations
+
+If you need to run migrations after deployment:
+
+1. Install Vercel CLI: `npm i -g vercel`
+2. Login: `vercel login`
+3. Link your project: `vercel link`
+4. Pull environment variables: `vercel env pull .env.production`
+5. Run migrations: `python manage.py migrate`
 
 ### Logs
 
