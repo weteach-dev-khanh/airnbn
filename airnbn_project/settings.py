@@ -94,12 +94,22 @@ DATABASES = {
 }
 
 # Use PostgreSQL for production (Supabase)
-if config('POSTGRES_URL', default=None):
-    DATABASES['default'] = dj_database_url.parse(
-        config('POSTGRES_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+postgres_url = config('POSTGRES_URL', default=None)
+if postgres_url:
+    # Manual configuration to avoid DSN parsing issues
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DATABASE', default='postgres'),
+        'USER': config('POSTGRES_USER', default='postgres'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+        'HOST': config('POSTGRES_HOST', default=''),
+        'PORT': config('POSTGRES_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+        'CONN_MAX_AGE': 600,
+        'CONN_HEALTH_CHECKS': True,
+    }
 
 
 # Password validation

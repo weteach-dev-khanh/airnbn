@@ -20,14 +20,17 @@ SECRET_KEY=your-secret-key-here
 DEBUG=False
 ALLOWED_HOSTS=your-domain.vercel.app
 
-# Supabase Database Configuration
-POSTGRES_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
-POSTGRES_PRISMA_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres?pgbouncer=true&connect_timeout=15
-POSTGRES_URL_NON_POOLING=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+# Supabase Database Configuration (Extract these from your Supabase connection string)
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your-supabase-password
 POSTGRES_DATABASE=postgres
 POSTGRES_HOST=db.[YOUR-PROJECT-REF].supabase.co
+POSTGRES_PORT=5432
+
+# Optional: Keep these for reference but the above manual config is more reliable
+POSTGRES_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+POSTGRES_PRISMA_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres?pgbouncer=true&connect_timeout=15
+POSTGRES_URL_NON_POOLING=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
 
 # Supabase Configuration
 SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
@@ -54,7 +57,17 @@ BLOB_READ_WRITE_TOKEN=your-blob-token
 
 1. Go to your Supabase project dashboard
 2. Navigate to Settings > Database
-3. Copy the connection strings and add them to your Vercel environment variables
+3. In the "Connection string" section, you'll find the connection details
+4. Extract the individual components:
+   - From `postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres`
+   - `POSTGRES_USER`: postgres
+   - `POSTGRES_PASSWORD`: [YOUR-PASSWORD] 
+   - `POSTGRES_HOST`: db.[YOUR-PROJECT-REF].supabase.co
+   - `POSTGRES_PORT`: 5432
+   - `POSTGRES_DATABASE`: postgres
+5. Add these individual values to your Vercel environment variables
+
+**Important**: Use the individual database components rather than the full connection string to avoid parsing issues.
 
 ### 3. Setup Vercel Blob Storage
 
