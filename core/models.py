@@ -223,3 +223,49 @@ class BlogPost(models.Model):
             from django.utils import timezone
             self.published_date = timezone.now()
         super().save(*args, **kwargs)
+
+
+
+# Booking Models
+class Booking(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    # Booking details
+    listing = models.ForeignKey(AirbnbListing, on_delete=models.CASCADE, related_name='bookings')
+    
+    # Guest information
+    fullname = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    guests = models.PositiveIntegerField()
+    
+    # Stay details
+    checkin_date = models.DateField()
+    checkout_date = models.DateField()
+    nights = models.PositiveIntegerField()
+    total_price = models.DecimalField(max_digits=12, decimal_places=0)
+    
+    # Optional message
+    message = models.TextField(blank=True)
+    
+    # Payment and status
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.fullname} - {self.listing.title} ({self.checkin_date} to {self.checkout_date})"
+    
+    def get_duration_display(self):
+        return f"{self.nights + 1} ngày {self.nights} đêm"
+    
+    class Meta:
+        verbose_name = "Booking"
+        verbose_name_plural = "Bookings"
+        ordering = ['-created_at']

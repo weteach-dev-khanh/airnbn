@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from datetime import datetime
 from .models import (
     AirbnbListing, PropertyType, Location,
-    BlogPost, BlogCategory, BlogAuthor
+    BlogPost, BlogCategory, BlogAuthor, Booking
 )
 
 def home(request):
@@ -124,3 +128,53 @@ def careers(request):
 def contact(request):
     """Contact page"""
     return render(request, 'core/contact.html')
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_booking(request):
+    """API endpoint to create a booking"""
+    try:
+        data = json.loads(request.body)
+        
+        # Get the listing
+        listing = get_object_or_404(AirbnbListing, id=data['listing_id'])
+        
+        # Parse dates
+        checkin_date = datetime.strptime(data['checkin_date'], '%Y-%m-%d').date()
+        checkout_date = datetime.strptime(data['checkout_date'], '%Y-%m-%d').date()
+        
+        # Calculate nights
+        nights = (checkout_date - checkin_date).days
+        
+        # Calculate total price
+        total_price = listing.price * nights
+        
+        # Create booking
+        booking = Booking.objects.create(
+            listing=listing,
+            fullname=data['fullname'],
+            email=data['email'],
+            phone=data['phone'],
+            guests=data['guests'],
+            checkin_date=checkin_date,
+            checkout_date=checkout_date,
+            nights=nights,
+            total_price=total_price,
+            message=data.get('message', ''),
+            payment_status='pending'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'booking_id': booking.id,
+            'total_price': float(total_price),
+            'nights': nights,
+            'duration_display': booking.get_duration_display()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
