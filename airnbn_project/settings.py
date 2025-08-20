@@ -95,20 +95,61 @@ DATABASES = {
 
 # Use PostgreSQL for production (Supabase)
 postgres_url = config('POSTGRES_URL', default=None)
-if postgres_url:
-    # Manual configuration to avoid DSN parsing issues
+postgres_host = config('POSTGRES_HOST', default=None)
+
+if postgres_host and not DEBUG:
+    # Production configuration optimized for Vercel serverless
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('POSTGRES_DATABASE', default='postgres'),
         'USER': config('POSTGRES_USER', default='postgres'),
         'PASSWORD': config('POSTGRES_PASSWORD', default=''),
-        'HOST': config('POSTGRES_HOST', default=''),
+        'HOST': postgres_host,
         'PORT': config('POSTGRES_PORT', default='5432'),
         'OPTIONS': {
             'sslmode': 'require',
+            'application_name': 'airnbn_vercel',
+            'connect_timeout': 30,
+            'options': '-c default_transaction_isolation=read_committed'
+        },
+        'CONN_MAX_AGE': 0,  # No persistent connections for serverless
+        'ATOMIC_REQUESTS': True,
+        'AUTOCOMMIT': True,
+    }
+elif postgres_host:
+    # Development configuration
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DATABASE', default='postgres'),
+        'USER': config('POSTGRES_USER', default='postgres'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+        'HOST': postgres_host,
+        'PORT': config('POSTGRES_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'application_name': 'airnbn_dev',
+            'connect_timeout': 10,
         },
         'CONN_MAX_AGE': 600,
-        'CONN_HEALTH_CHECKS': True,
+    }
+
+# Logging configuration to help debug database issues
+if not DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django.db.backends': {
+                'level': 'INFO',
+                'handlers': ['console'],
+            },
+        },
     }
 
 

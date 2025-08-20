@@ -152,6 +152,12 @@ Migrations are automatically run during the Vercel build process via the `build_
    - Verify Supabase connection strings
    - Check that the database is accessible from Vercel's servers
    - Ensure password and host are correct
+   - **Try these solutions for connection issues**:
+     - In Supabase, go to Settings > Database > Connection pooling
+     - Enable connection pooling if not already enabled
+     - Use the pooled connection string instead of direct connection
+     - Check if your Supabase project has any IP restrictions
+     - Verify your Supabase project is in the same region as your Vercel deployment
 
 3. **Static Files**: 
    - Vercel handles static files automatically with WhiteNoise
@@ -177,6 +183,40 @@ If you need to run migrations after deployment:
 3. Link your project: `vercel link`
 4. Pull environment variables: `vercel env pull .env.production`
 5. Run migrations: `python manage.py migrate`
+
+### Specific Solutions for "Cannot assign requested address" Error
+
+If you get a database connection error with "Cannot assign requested address":
+
+1. **Check Supabase Network Settings**:
+   - Go to your Supabase project Settings > Database
+   - Scroll down to "Network restrictions"
+   - Make sure "Restrict connections to listed IP addresses" is **disabled**
+   - Or add Vercel's IP ranges if you need restrictions
+
+2. **Use Connection Pooling**:
+   - In Supabase Settings > Database
+   - Enable "Connection pooling" if not already enabled
+   - Use the pooled connection string in your environment variables
+
+3. **Verify Environment Variables**:
+   ```bash
+   # Make sure these are correctly set in Vercel:
+   POSTGRES_HOST=db.uynbrhuqdiktmoplaajf.supabase.co
+   POSTGRES_USER=postgres
+   POSTGRES_PASSWORD=your-actual-password
+   POSTGRES_DATABASE=postgres
+   POSTGRES_PORT=5432
+   ```
+
+4. **Alternative: Use PlanetScale or Neon**:
+   - If Supabase continues to have connection issues with Vercel
+   - Consider switching to PlanetScale or Neon.tech
+   - Both have better Vercel integration
+
+5. **Temporary Fallback**:
+   - Set `DEBUG=True` temporarily to use SQLite
+   - This will let you test if the issue is database-specific
 
 ### Logs
 
