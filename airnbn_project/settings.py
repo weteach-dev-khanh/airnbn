@@ -81,10 +81,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'jB3FGO0dnrS8jLjF',
         'HOST': 'db.uynbrhuqdiktmoplaajf.supabase.co',
-        'PORT': '6543',
-        'CONN_MAX_AGE': 0,  # No persistent connections for serverless
-        'ATOMIC_REQUESTS': True,
-        'AUTOCOMMIT': True,
+        'PORT': '5432'
     }
 }
 
