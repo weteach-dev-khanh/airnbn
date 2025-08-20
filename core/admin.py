@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     PropertyType, Location, AirbnbListing, 
     ListingImage, Amenity, ListingAmenity,
-    BlogPost, BlogCategory, BlogAuthor
+    BlogPost, BlogCategory, BlogAuthor,
+    Booking
 )
 
 @admin.register(PropertyType)
@@ -121,3 +122,29 @@ class BlogPostAdmin(admin.ModelAdmin):
             from django.utils import timezone
             obj.published_date = timezone.now()
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ['fullname', 'listing', 'checkin_date', 'checkout_date', 'guests', 'total_price', 'payment_status', 'created_at']
+    list_filter = ['payment_status', 'checkin_date', 'created_at']
+    search_fields = ['fullname', 'email', 'phone', 'listing__title']
+    readonly_fields = ['created_at', 'updated_at', 'nights']
+    fieldsets = (
+        ('Guest Information', {
+            'fields': ('fullname', 'email', 'phone')
+        }),
+        ('Booking Details', {
+            'fields': ('listing', 'checkin_date', 'checkout_date', 'nights', 'guests', 'total_price', 'message')
+        }),
+        ('Payment & Status', {
+            'fields': ('payment_status',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('listing')

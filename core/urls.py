@@ -12,4 +12,7 @@ urlpatterns = [
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('careers/', views.careers, name='careers'),
     path('contact/', views.contact, name='contact'),
+    
+    # API endpoints
+    path('api/booking/create/', views.create_booking, name='create_booking'),
 ]
