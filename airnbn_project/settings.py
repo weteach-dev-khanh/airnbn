@@ -26,16 +26,7 @@ SECRET_KEY = 'django-insecure-hd(#7fj7*gw8+i+!b24j82q#^6($bbyr_r_*#heyw*)vs!tfzl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["nguyenvietanhnov.com", "*.vercel.app", "localhost", "127.0.0.1"]
-
-# Add Vercel domains
-if not DEBUG:
-    ALLOWED_HOSTS.extend([
-        '.vercel.app',
-        '.now.sh',
-        'airnbn.vercel.app',  # Replace with your actual Vercel domain
-    ])
-
+ALLOWED_HOSTS = ["nguyenvietanhnov.com", "airnbn-zeta.vercel.app", "localhost", "127.0.0.1"]
 
 # Application definition
 
