@@ -269,3 +269,36 @@ class Booking(models.Model):
         verbose_name = "Booking"
         verbose_name_plural = "Bookings"
         ordering = ['-created_at']
+
+
+class CourseEnrollment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Chờ thanh toán'),
+        ('paid', 'Đã thanh toán'),
+        ('cancelled', 'Đã hủy'),
+    ]
+    
+    # Course information (using slug to identify course from static data)
+    course_slug = models.CharField(max_length=100)
+    course_title = models.CharField(max_length=200)
+    course_price = models.CharField(max_length=50)  # Store as string like "2,990,000"
+    
+    # Student information
+    fullname = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    
+    # Payment status
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.fullname} - {self.course_title}"
+    
+    class Meta:
+        verbose_name = "Course Enrollment"
+        verbose_name_plural = "Course Enrollments"
+        ordering = ['-created_at']

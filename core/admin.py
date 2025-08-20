@@ -3,7 +3,7 @@ from .models import (
     PropertyType, Location, AirbnbListing, 
     ListingImage, Amenity, ListingAmenity,
     BlogPost, BlogCategory, BlogAuthor,
-    Booking
+    Booking, CourseEnrollment
 )
 
 @admin.register(PropertyType)
@@ -148,3 +148,33 @@ class BookingAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('listing')
+
+
+@admin.register(CourseEnrollment)
+class CourseEnrollmentAdmin(admin.ModelAdmin):
+    list_display = [
+        'fullname', 'course_title', 'email', 'phone', 
+        'course_price', 'payment_status', 'created_at'
+    ]
+    list_filter = ['payment_status', 'course_slug', 'created_at']
+    search_fields = ['fullname', 'email', 'phone', 'course_title']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Course Information', {
+            'fields': ('course_slug', 'course_title', 'course_price')
+        }),
+        ('Student Information', {
+            'fields': ('fullname', 'email', 'phone')
+        }),
+        ('Payment & Status', {
+            'fields': ('payment_status',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request)
