@@ -4,487 +4,298 @@
 {% block title %}{{ listing.title }} - Airbnb{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
     <!-- Header -->
-    <a href="{% url 'core:airbnb' %}"
-        class="inline-flex items-center text-gray-600 hover:text-black transition-colors mb-6">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Quay lại danh sách Airbnb
-    </a>
-    <h1 class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-black">
-        {{ listing.title }}
-    </h1>
-    <p class="text-gray-600 mb-6">{{ listing.location.name_vietnamese }}</p>
-
-    <!-- Image Gallery -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div class="relative h-96 overflow-hidden rounded-xl"
-            style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
-            {% if listing.images.exists %}
-            <img src="{{ listing.images.first.image.url }}" alt="{{ listing.title }}"
-                class="w-full h-full object-cover">
-            {% else %}
-            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                <i data-lucide="image" class="w-16 h-16 text-gray-400"></i>
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ listing.title }}</h1>
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <div class="flex items-center">
+                    <i data-lucide="star" class="text-black w-5 h-5 mr-1 fill-current"></i>
+                    <span class="font-semibold">{{ listing.rating }}</span>
+                    <span class="text-gray-600 ml-1">({{ listing.reviews_count }} đánh giá)</span>
+                </div>
+                <div class="flex items-center text-gray-600">
+                    <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>
+                    <span>{{ listing.location.name }}</span>
+                </div>
             </div>
-            {% endif %}
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            {% for image in listing.images.all|slice:"1:4" %}
-            <div class="relative h-44 overflow-hidden rounded-xl"
-                style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
-                <img src="{{ image.image.url }}" alt="{{ listing.title }} {{ forloop.counter|add:1 }}"
-                    class="w-full h-full object-cover">
+            <div class="flex items-center space-x-4">
+                <button class="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+                    <i data-lucide="share" class="w-5 h-5"></i>
+                    <span>Chia sẻ</span>
+                </button>
+                <button class="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                    <span>Lưu</span>
+                </button>
             </div>
-            {% empty %}
-            {% for i in "123" %}
-            <div class="relative h-44 overflow-hidden rounded-xl bg-gray-200 flex items-center justify-center"
-                style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
-                <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
-            </div>
-            {% endfor %}
-            {% endfor %}
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Image Gallery -->
+    <div class="mb-8 rounded-2xl overflow-hidden">
+        {% if listing.get_all_images %}
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-2 h-96 lg:h-[500px]">
+                {% for image in listing.get_all_images|slice:":5" %}
+                    {% if forloop.first %}
+                        <!-- Main image -->
+                        <div class="lg:col-span-2 lg:row-span-2 h-full">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ listing.title }}"
+                                 class="w-full h-full object-cover hover:brightness-90 transition-all cursor-pointer"
+                                 onclick="openImageModal('{{ image.image.url }}')">
+                        </div>
+                    {% else %}
+                        <!-- Secondary images -->
+                        <div class="h-full {% if forloop.counter0 == 1 or forloop.counter0 == 3 %}lg:col-span-2{% endif %}">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ listing.title }}"
+                                 class="w-full h-full object-cover hover:brightness-90 transition-all cursor-pointer"
+                                 onclick="openImageModal('{{ image.image.url }}')">
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Placeholder if no images -->
+            <div class="h-96 lg:h-[500px] bg-gray-300 rounded-2xl flex items-center justify-center">
+                <i data-lucide="image" class="w-32 h-32 text-gray-500"></i>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <!-- Main Content -->
-        <div class="md:col-span-2">
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-900">About this place</h2>
-                <p class="text-gray-600">{{ listing.description }}</p>
+        <div class="lg:col-span-2">
+            <!-- Property Info -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold mb-2">
+                            {{ listing.property_type.name_vietnamese }} tại {{ listing.location.name_vietnamese }}
+                        </h2>
+                        <div class="flex items-center space-x-4 text-gray-600">
+                            <span>{{ listing.max_guests }} khách</span>
+                            <span>•</span>
+                            <span>{{ listing.bedrooms }} phòng ngủ</span>
+                            <span>•</span>
+                            <span>{{ listing.bathrooms }} phòng tắm</span>
+                        </div>
+                    </div>
+                    {% if listing.host_avatar %}
+                        <img src="{{ listing.host_avatar.url }}" 
+                             alt="{{ listing.host_name }}"
+                             class="w-14 h-14 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-14 h-14 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-6 h-6 text-gray-500"></i>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-900">What this place offers</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    {% for listing_amenity in listing.amenities.all %}
-                    <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                        <span class="text-black font-bold">✓</span>
-                        <span class="ml-2">{{ listing_amenity.amenity.name }}</span>
-                    </div>
-                    {% empty %}
-                    <div class="col-span-2">
-                        <p class="text-gray-500 italic">Thông tin tiện nghi sẽ được cập nhật</p>
-                    </div>
+            <!-- Description -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-4">Mô tả</h3>
+                <div class="prose prose-lg text-gray-700">
+                    {{ listing.description|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            {% if listing.get_amenities %}
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-6">Tiện nghi</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for amenity in listing.get_amenities %}
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="check" class="w-5 h-5 text-green-500"></i>
+                            <span>{{ amenity.name_vietnamese }}</span>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
 
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-900">Host</h2>
-                <div class="flex items-center">
-                    <div class="relative h-16 w-16 rounded-full overflow-hidden border-2 border-white"
-                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        {% if listing.host_image %}
-                        <img src="{{ listing.host_image.url }}" alt="{{ listing.host_name }}"
-                            class="w-full h-full object-cover">
-                        {% else %}
-                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
+            <!-- Host Info -->
+            <div class="border-b border-gray-200 pb-8 mb-8">
+                <h3 class="text-xl font-semibold mb-6">Về chủ nhà</h3>
+                <div class="flex items-start space-x-4">
+                    {% if listing.host_avatar %}
+                        <img src="{{ listing.host_avatar.url }}" 
+                             alt="{{ listing.host_name }}"
+                             class="w-16 h-16 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-8 h-8 text-gray-500"></i>
                         </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="text-lg font-semibold mb-2">{{ listing.host_name }}</h4>
+                        {% if listing.host_bio %}
+                            <p class="text-gray-600">{{ listing.host_bio }}</p>
                         {% endif %}
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="font-semibold">{{ listing.host_name|default:"Viet Anh" }}</h3>
-                        <p class="text-gray-600">Response time: within an hour</p>
+                        <div class="flex items-center space-x-4 mt-3 text-sm text-gray-600">
+                            {% if listing.host_response_rate %}
+                                <span>Tỷ lệ phản hồi: {{ listing.host_response_rate }}%</span>
+                            {% endif %}
+                            {% if listing.host_response_time %}
+                                <span>•</span>
+                                <span>Thời gian phản hồi: {{ listing.host_response_time }}</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Location -->
+            <div>
+                <h3 class="text-xl font-semibold mb-6">Vị trí</h3>
+                <div class="bg-gray-100 rounded-xl h-64 flex items-center justify-center mb-4">
+                    <div class="text-center">
+                        <i data-lucide="map-pin" class="w-12 h-12 text-gray-500 mx-auto mb-2"></i>
+                        <p class="text-gray-600">{{ listing.location.name }}</p>
+                    </div>
+                </div>
+                {% if listing.address %}
+                    <p class="text-gray-600">{{ listing.address }}</p>
+                {% endif %}
             </div>
         </div>
 
         <!-- Booking Card -->
-        <div class="md:col-span-1">
-            <div class="bg-white rounded-xl shadow-md p-6 sticky top-8"
-                style="box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);">
-                <div class="mb-6">
-                    <span class="text-2xl font-bold">{{ listing.price|floatformat:"0" }} VND</span>
-                    <span class="text-gray-600">/night</span>
-                </div>
+        <div class="lg:col-span-1">
+            <div class="sticky top-24">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6"
+                     style="box-shadow: 0 15px 40px rgba(0,0,0,0.08);">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-2xl font-bold">{{ listing.get_price_display }} VND</span>
+                                <span class="text-gray-600">/đêm</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="star" class="text-black w-4 h-4 mr-1 fill-current"></i>
+                                <span class="font-semibold">{{ listing.rating }}</span>
+                                <span class="text-gray-600 ml-1">({{ listing.reviews_count }})</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="space-y-4">
-                    <button onclick="openBookingModal()"
-                        class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-all font-semibold"
-                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        Đặt phòng trực tiếp
+                    <form class="space-y-4 mb-6">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="border border-gray-300 rounded-lg p-3">
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Nhận phòng</label>
+                                <input type="date" class="w-full border-none focus:outline-none text-sm mt-1">
+                            </div>
+                            <div class="border border-gray-300 rounded-lg p-3">
+                                <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Trả phòng</label>
+                                <input type="date" class="w-full border-none focus:outline-none text-sm mt-1">
+                            </div>
+                        </div>
+                        <div class="border border-gray-300 rounded-lg p-3">
+                            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Khách</label>
+                            <select class="w-full border-none focus:outline-none text-sm mt-1">
+                                {% for i in "123456789"|make_list %}
+                                    {% if i|add:0 <= listing.max_guests %}
+                                        <option value="{{ i }}">{{ i }} khách</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+
+                    <button class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-lg transition-all mb-4"
+                            style="box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);">
+                        Đặt phòng ngay
                     </button>
 
-                    {% if listing.airbnb_link %}
-                    <a href="{{ listing.airbnb_link }}" target="_blank" rel="noopener noreferrer"
-                        class="block w-full bg-[#FF5A5F] text-white text-center py-3 rounded-md hover:bg-[#FF385F] transition-all"
-                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        Book on Airbnb
-                    </a>
-                    {% endif %}
+                    <p class="text-center text-gray-600 text-sm mb-4">
+                        Bạn sẽ chưa bị tính phí
+                    </p>
 
-                    {% if listing.phone %}
-                    <a href="tel:{{ listing.phone }}"
-                        class="block w-full bg-green-600 text-white text-center py-3 rounded-md hover:bg-green-700 transition-all"
-                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        Call Host
-                    </a>
-                    {% endif %}
+                    <div class="space-y-3 border-t border-gray-200 pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{{ listing.get_price_display }} VND x 5 đêm</span>
+                            <span>{{ listing.price|floatformat:0|add:"00000" }} VND</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Phí dịch vụ</span>
+                            <span>{{ listing.price|floatformat:0|add:"0000" }} VND</span>
+                        </div>
+                        <div class="flex justify-between border-t border-gray-200 pt-3 font-semibold">
+                            <span>Tổng cộng</span>
+                            <span>{{ listing.price|floatformat:0|add:"00000" }} VND</span>
+                        </div>
+                    </div>
+                </div>
 
-                    {% if listing.facebook_url %}
-                    <a href="{{ listing.facebook_url }}" target="_blank" rel="noopener noreferrer"
-                        class="block w-full bg-blue-600 text-white text-center py-3 rounded-md hover:bg-blue-700 transition-all"
-                        style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        Message on Facebook
+                <!-- Contact Card -->
+                <div class="mt-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
+                    <h4 class="font-semibold mb-3">Cần hỗ trợ?</h4>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Liên hệ với chúng tôi để được tư vấn và hỗ trợ đặt phòng.
+                    </p>
+                    <a href="{% url 'core:contact' %}"
+                       class="inline-block bg-black hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-all text-sm font-medium">
+                        Liên hệ ngay
                     </a>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Back Button -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+        <a href="{% url 'core:airbnb' %}" 
+           class="inline-flex items-center space-x-2 text-gray-600 hover:text-black transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            <span>Quay lại danh sách</span>
+        </a>
+    </div>
 </div>
 
-<!-- Booking Modal -->
-<div id="bookingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-        style="box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-
-        <!-- Step 1: Booking Form -->
-        <div id="step1" class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Đặt phòng trực tiếp</h3>
-                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <form id="bookingForm" onsubmit="goToStep2(event)" class="space-y-4">
-                <div>
-                    <label for="fullname" class="block text-sm font-medium text-gray-700 mb-2">Họ và tên *</label>
-                    <input type="text" id="fullname" name="fullname" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                </div>
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                    <input type="email" id="email" name="email" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                </div>
-
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại *</label>
-                    <input type="tel" id="phone" name="phone" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                </div>
-
-                <div>
-                    <label for="guests" class="block text-sm font-medium text-gray-700 mb-2">Số khách *</label>
-                    <select id="guests" name="guests" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                        <option value="">Chọn số khách</option>
-                        <option value="1">1 khách</option>
-                        <option value="2">2 khách</option>
-                        <option value="3">3 khách</option>
-                        <option value="4">4 khách</option>
-                        <option value="5">5 khách</option>
-                        <option value="6">6+ khách</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="checkin" class="block text-sm font-medium text-gray-700 mb-2">Ngày nhận phòng
-                            *</label>
-                        <input type="date" id="checkin" name="checkin" required onchange="calculateNights()"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                    </div>
-                    <div>
-                        <label for="checkout" class="block text-sm font-medium text-gray-700 mb-2">Ngày trả phòng
-                            *</label>
-                        <input type="date" id="checkout" name="checkout" required onchange="calculateNights()"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                    </div>
-                </div>
-
-                <div id="nightsDisplay" class="hidden bg-gray-50 p-3 rounded-md">
-                    <p class="text-sm text-gray-600">
-                        <span id="nightsText"></span>
-                        <span class="float-right font-semibold" id="totalPrice"></span>
-                    </p>
-                </div>
-
-                <div>
-                    <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Tin nhắn (tùy
-                        chọn)</label>
-                    <textarea id="message" name="message" rows="3" placeholder="Ghi chú đặc biệt hoặc yêu cầu..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"></textarea>
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-all font-semibold">
-                    Xác nhận đặt phòng
-                </button>
-            </form>
-        </div>
-
-        <!-- Step 2: Confirmation -->
-        <div id="step2" class="p-6 hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Xác nhận thông tin</h3>
-                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div id="bookingSummary" class="space-y-4 mb-6">
-                <!-- Will be populated with booking details -->
-            </div>
-
-            <div class="flex space-x-3">
-                <button onclick="goBackToStep1()"
-                    class="flex-1 bg-gray-500 text-white py-3 rounded-md hover:bg-gray-600 transition-all font-semibold">
-                    Trở về
-                </button>
-                <button onclick="confirmBooking()"
-                    class="flex-1 bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-all font-semibold">
-                    Xác nhận đặt phòng
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 3: QR Code Payment -->
-        <div id="step3" class="p-6 hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-gray-900">Thanh toán</h3>
-                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="text-center mb-6">
-                <p class="text-gray-600 mb-4">Quét mã QR để thanh toán</p>
-                <div id="qrContainer" class="flex justify-center mb-4">
-                    <!-- QR Code will be inserted here -->
-                </div>
-                <p class="text-sm text-gray-500">Số tiền: <span id="paymentAmount" class="font-semibold"></span></p>
-            </div>
-
-            <button onclick="confirmPayment()"
-                class="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition-all font-semibold">
-                Xác nhận thanh toán
-            </button>
-        </div>
-
-        <!-- Step 4: Success -->
-        <div id="step4" class="p-6 hidden">
-            <div class="text-center">
-                <div class="mb-4">
-                    <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Đặt phòng thành công!</h3>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Host Line: 0123456789</h3>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Email: test@gmail.com</h3>
-                <p class="text-gray-600 mb-6">
-                    Chúng tôi đã nhận được thông tin đặt phòng của bạn, nhân viên sẽ liên hệ bạn trong thời gian sớm
-                    nhất.
-                </p>
-                <button onclick="closeBookingModal()"
-                    class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-all font-semibold">
-                    Đóng
-                </button>
-            </div>
-        </div>
+<!-- Image Modal -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-4">
+    <div class="relative max-w-5xl max-h-full">
+        <button onclick="closeImageModal()" 
+                class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain">
     </div>
 </div>
 
 <script>
-    let currentBookingData = {};
+function openImageModal(imageSrc) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    modalImage.src = imageSrc;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
 
-    function openBookingModal() {
-        document.getElementById('bookingModal').classList.remove('hidden');
-        document.getElementById('bookingModal').classList.add('flex');
-        document.body.style.overflow = 'hidden';
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = 'auto';
+}
 
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('checkin').min = today;
-        document.getElementById('checkout').min = today;
-
-        // Reset to step 1
-        showStep(1);
+// Close modal when clicking outside the image
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
     }
+});
 
-    function closeBookingModal() {
-        document.getElementById('bookingModal').classList.add('hidden');
-        document.getElementById('bookingModal').classList.remove('flex');
-        document.body.style.overflow = 'auto';
-
-        // Reset form
-        document.getElementById('bookingForm').reset();
-        document.getElementById('nightsDisplay').classList.add('hidden');
-        currentBookingData = {};
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
     }
-
-    function showStep(stepNumber) {
-        // Hide all steps
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById(`step${i}`).classList.add('hidden');
-        }
-        // Show current step
-        document.getElementById(`step${stepNumber}`).classList.remove('hidden');
-    }
-
-    function calculateNights() {
-        const checkin = new Date(document.getElementById('checkin').value);
-        const checkout = new Date(document.getElementById('checkout').value);
-
-        if (checkin && checkout && checkout > checkin) {
-            const timeDiff = checkout.getTime() - checkin.getTime();
-            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-            document.getElementById('nightsText').textContent = `${nights} ngày ${nights - 1} đêm`;
-
-            const pricePerNight = parseFloat("{{ listing.price|default:'0' }}");
-            const totalPrice = pricePerNight * nights;
-            document.getElementById('totalPrice').textContent = totalPrice.toLocaleString('vi-VN') + ' VND';
-
-            document.getElementById('nightsDisplay').classList.remove('hidden');
-
-            // Update checkout minimum date
-            const nextDay = new Date(checkin);
-            nextDay.setDate(nextDay.getDate() + 1);
-            document.getElementById('checkout').min = nextDay.toISOString().split('T')[0];
-        } else {
-            document.getElementById('nightsDisplay').classList.add('hidden');
-        }
-    }
-
-    function goToStep2(event) {
-        event.preventDefault();
-
-        const formData = new FormData(event.target);
-        currentBookingData = Object.fromEntries(formData.entries());
-
-        // Map field names to match backend expectations
-        currentBookingData.checkin_date = currentBookingData.checkin;
-        currentBookingData.checkout_date = currentBookingData.checkout;
-
-        // Calculate nights and total
-        const checkin = new Date(currentBookingData.checkin);
-        const checkout = new Date(currentBookingData.checkout);
-        const nights = Math.ceil((checkout.getTime() - checkin.getTime()) / (1000 * 3600 * 24));
-        const pricePerNight = parseFloat("{{ listing.price|default:'0' }}");
-        const total = pricePerNight * nights;
-
-        currentBookingData.nights = nights;
-        currentBookingData.total_price = total;
-        currentBookingData.listing_id = parseInt("{{ listing.id|default:'0' }}");
-
-
-
-        // Populate summary
-        const summary = document.getElementById('bookingSummary');
-        summary.innerHTML = `
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <h4 class="font-semibold mb-3">Thông tin đặt phòng</h4>
-            <div class="space-y-2 text-sm">
-                <p><span class="font-medium">Khách sạn:</span> {{ listing.title }}</p>
-                <p><span class="font-medium">Khách hàng:</span> ${currentBookingData.fullname}</p>
-                <p><span class="font-medium">Email:</span> ${currentBookingData.email}</p>
-                <p><span class="font-medium">Điện thoại:</span> ${currentBookingData.phone}</p>
-                <p><span class="font-medium">Số khách:</span> ${currentBookingData.guests}</p>
-                <p><span class="font-medium">Nhận phòng:</span> ${currentBookingData.checkin}</p>
-                <p><span class="font-medium">Trả phòng:</span> ${currentBookingData.checkout}</p>
-                <p><span class="font-medium">Thời gian:</span> ${nights} ngày ${nights - 1} đêm</p>
-                <p><span class="font-medium">Tổng tiền:</span> ${total.toLocaleString('vi-VN')} VND</p>
-                ${currentBookingData.message ? `<p><span class="font-medium">Tin nhắn:</span> ${currentBookingData.message}</p>` : ''}
-            </div>
-        </div>
-    `;
-
-        showStep(2);
-    }
-
-    function goBackToStep1() {
-        showStep(1);
-    }
-
-    async function confirmBooking() {
-        try {
-            const response = await fetch('{% url "core:create_booking" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(currentBookingData)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                currentBookingData.booking_id = result.booking_id;
-                await generateQRCode();
-                showStep(3);
-            } else {
-                alert('Có lỗi xảy ra: ' + result.error);
-            }
-        } catch (error) {
-            alert('Có lỗi xảy ra khi đặt phòng: ' + error.message);
-        }
-    }
-
-    async function generateQRCode() {
-        try {
-            // Show loading message briefly for better UX
-            document.getElementById('qrContainer').innerHTML = `
-                <div class="flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-                    <span class="ml-2">Đang hiển thị mã QR...</span>
-                </div>
-            `;
-
-            // Simulate short loading time for better UX
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Display the local QR code image
-            document.getElementById('qrContainer').innerHTML = `
-                <img src="{% static 'core/images/qrcode/qrcode.svg' %}" 
-                     alt="QR Code Payment" 
-                     class="max-w-full h-auto border rounded-lg shadow-md"
-                     style="max-width: 250px;">
-            `;
-
-            // Display the payment amount
-            document.getElementById('paymentAmount').textContent =
-                currentBookingData.total_price.toLocaleString('vi-VN') + ' VND';
-
-        } catch (error) {
-            console.error('QR Display Error:', error);
-            document.getElementById('qrContainer').innerHTML = `
-                <div class="text-center p-4">
-                    <p class="text-red-500 mb-2">Không thể hiển thị mã QR</p>
-                    <p class="text-sm text-gray-500">Vui lòng liên hệ trực tiếp</p>
-                </div>
-            `;
-        }
-    }
-
-    function confirmPayment() {
-        showStep(4);
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('bookingModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeBookingModal();
-        }
-    });
+});
 </script>
 {% endblock %}
