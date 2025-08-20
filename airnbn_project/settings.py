@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-hd(#7fj7*gw8+i+!b24j82q#^6($bbyr_r_*#heyw*)vs!tfzl')
+SECRET_KEY = 'django-insecure-hd(#7fj7*gw8+i+!b24j82q#^6($bbyr_r_*#heyw*)vs!tfzl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = False
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ["nguyenvietanhnov.com", ".vercel.app", "localhost", "127.0.0.1"]
 
 # Add Vercel domains
 if not DEBUG:
@@ -93,12 +91,6 @@ DATABASES = {
         'PASSWORD': 'jB3FGO0dnrS8jLjF',
         'HOST': 'db.uynbrhuqdiktmoplaajf.supabase.co',
         'PORT': '6543',
-        'OPTIONS': {
-            'sslmode': 'require',
-            'application_name': 'airnbn_vercel',
-            'connect_timeout': 30,
-            'options': '-c default_transaction_isolation=read_committed'
-        },
         'CONN_MAX_AGE': 0,  # No persistent connections for serverless
         'ATOMIC_REQUESTS': True,
         'AUTOCOMMIT': True,
@@ -187,11 +179,11 @@ if DEBUG:
 else:
     # Production - use Vercel Blob Storage
     DEFAULT_FILE_STORAGE = 'core.storage_backends.VercelBlobStorage'
-    MEDIA_URL = config('VERCEL_BLOB_BASE_URL', default='https://yryhdmorv8znchlu.public.blob.vercel-storage.com') + '/'
+    MEDIA_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com' + '/'
 
 # Vercel Blob Storage settings
-VERCEL_BLOB_BASE_URL = config('VERCEL_BLOB_BASE_URL', default='https://yryhdmorv8znchlu.public.blob.vercel-storage.com')
-BLOB_READ_WRITE_TOKEN = config('BLOB_READ_WRITE_TOKEN', default='')
+VERCEL_BLOB_BASE_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com'
+BLOB_READ_WRITE_TOKEN = ''
 
 # Login URLs
 LOGIN_URL = '/login/'
