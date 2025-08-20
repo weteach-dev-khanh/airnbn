@@ -85,27 +85,14 @@ WSGI_APPLICATION = 'airnbn_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Default to SQLite for development
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Use PostgreSQL for production (Supabase)
-postgres_url = config('POSTGRES_URL', default=None)
-postgres_host = config('POSTGRES_HOST', default=None)
-
-if postgres_host and not DEBUG:
-    # Production configuration optimized for Vercel serverless
-    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DATABASE', default='postgres'),
-        'USER': config('POSTGRES_USER', default='postgres'),
-        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
-        'HOST': postgres_host,
-        'PORT': config('POSTGRES_PORT', default='5432'),
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'jB3FGO0dnrS8jLjF',
+        'HOST': 'db.uynbrhuqdiktmoplaajf.supabase.co',
+        'PORT': '6543',
         'OPTIONS': {
             'sslmode': 'require',
             'application_name': 'airnbn_vercel',
@@ -116,22 +103,7 @@ if postgres_host and not DEBUG:
         'ATOMIC_REQUESTS': True,
         'AUTOCOMMIT': True,
     }
-elif postgres_host:
-    # Development configuration
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DATABASE', default='postgres'),
-        'USER': config('POSTGRES_USER', default='postgres'),
-        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
-        'HOST': postgres_host,
-        'PORT': config('POSTGRES_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-            'application_name': 'airnbn_dev',
-            'connect_timeout': 10,
-        },
-        'CONN_MAX_AGE': 600,
-    }
+}
 
 # Logging configuration to help debug database issues
 if not DEBUG:
