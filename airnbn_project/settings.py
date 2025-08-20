@@ -140,12 +140,37 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Static files directories
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Static files configuration for Vercel
+if not DEBUG:
+    # Production - use WhiteNoise without manifest for debugging
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    # Add cache control for static files
+    WHITENOISE_MAX_AGE = 31536000  # 1 year
+    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
+else:
+    # Development
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# Media files configuration
+if DEBUG:
+    # Local development - use local storage
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+else:
+    # Production - use Vercel Blob Storage
+    DEFAULT_FILE_STORAGE = 'core.storage_backends.VercelBlobStorage'
+    MEDIA_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com' + '/'
 
 # Vercel Blob Storage settings
 VERCEL_BLOB_BASE_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com'
