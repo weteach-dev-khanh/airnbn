@@ -1,7 +1,4 @@
 *.pyc
 .venv/
 nguyenvietanhnov-main/
-docker-compose.yml
-Dockerfile
-run.ps1
-db.sqlite3
+
