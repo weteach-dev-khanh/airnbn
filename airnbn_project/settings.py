@@ -105,7 +105,7 @@ if postgres_host and not DEBUG:
         'USER': config('POSTGRES_USER', default='postgres'),
         'PASSWORD': config('POSTGRES_PASSWORD', default=''),
         'HOST': postgres_host,
-        'PORT': config('POSTGRES_PORT', default='6543'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
         'OPTIONS': {
             'sslmode': 'require',
             'application_name': 'airnbn_vercel',
@@ -124,7 +124,7 @@ elif postgres_host:
         'USER': config('POSTGRES_USER', default='postgres'),
         'PASSWORD': config('POSTGRES_PASSWORD', default=''),
         'HOST': postgres_host,
-        'PORT': config('POSTGRES_PORT', default='6543'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
         'OPTIONS': {
             'sslmode': 'require',
             'application_name': 'airnbn_dev',
