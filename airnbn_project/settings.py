@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,10 +78,10 @@ WSGI_APPLICATION = 'airnbn_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'jB3FGO0dnrS8jLjF',
-        'HOST': 'db.uynbrhuqdiktmoplaajf.supabase.co',
+        'NAME': 'neondb',
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_ShZdQEJkY69p',
+        'HOST': 'ep-dry-surf-a1dt75yn-pooler.ap-southeast-1.aws.neon.tech',
         'PORT': '5432'
     }
 }
