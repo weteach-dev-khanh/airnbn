@@ -19,8 +19,4 @@ python3.9 manage.py collectstatic --noinput --clear
 echo "Running migrations..."
 python3.9 manage.py migrate --noinput
 
-# List staticfiles for debugging
-echo "Static files collected:"
-ls -la staticfiles/ || echo "No staticfiles directory found"
-
 echo "Build completed successfully!"
