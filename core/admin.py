@@ -2,7 +2,9 @@ from django.contrib import admin
 from .models import (
     PropertyType, Location, AirbnbListing, 
     ListingImage, Amenity, ListingAmenity,
-    BlogPost, BlogCategory, BlogAuthor
+    BlogPost, BlogCategory, BlogAuthor,
+    Course, CourseCategory, CourseLesson, CourseReview,
+    Booking
 )
 
 @admin.register(PropertyType)
@@ -121,3 +123,84 @@ class BlogPostAdmin(admin.ModelAdmin):
             from django.utils import timezone
             obj.published_date = timezone.now()
         super().save_model(request, obj, form, change)
+
+
+# Course Admin
+class CourseLessonInline(admin.TabularInline):
+    model = CourseLesson
+    extra = 1
+    fields = ['title', 'duration', 'order', 'is_free']
+    ordering = ['order']
+
+class CourseReviewInline(admin.TabularInline):
+    model = CourseReview
+    extra = 0
+    readonly_fields = ['created_at']
+    fields = ['student_name', 'rating', 'comment', 'created_at']
+
+@admin.register(CourseCategory)
+class CourseCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name_vietnamese', 'name', 'slug', 'icon']
+    search_fields = ['name', 'name_vietnamese']
+    prepopulated_fields = {'slug': ('name',)}
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ['title', 'instructor', 'price', 'duration', 'students', 'created_at']
+    list_filter = ['instructor', 'created_at']
+    search_fields = ['title', 'description', 'instructor']
+    prepopulated_fields = {'slug': ('title',)}
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'slug', 'instructor', 'description', 'image')
+        }),
+        ('Course Details', {
+            'fields': ('price', 'duration', 'students', 'curriculum', 'features')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(CourseLesson)
+class CourseLessonAdmin(admin.ModelAdmin):
+    list_display = ['course', 'title', 'duration', 'order', 'is_free']
+    list_filter = ['course', 'is_free']
+    search_fields = ['title', 'course__title']
+    ordering = ['course', 'order']
+
+@admin.register(CourseReview)
+class CourseReviewAdmin(admin.ModelAdmin):
+    list_display = ['course', 'student_name', 'rating', 'created_at']
+    list_filter = ['rating', 'created_at']
+    search_fields = ['student_name', 'course__title', 'comment']
+    readonly_fields = ['created_at']
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ['fullname', 'listing', 'checkin_date', 'checkout_date', 'guests', 'total_price', 'payment_status', 'created_at']
+    list_filter = ['payment_status', 'checkin_date', 'created_at']
+    search_fields = ['fullname', 'email', 'phone', 'listing__title']
+    readonly_fields = ['created_at', 'updated_at', 'nights']
+    fieldsets = (
+        ('Guest Information', {
+            'fields': ('fullname', 'email', 'phone')
+        }),
+        ('Booking Details', {
+            'fields': ('listing', 'checkin_date', 'checkout_date', 'nights', 'guests', 'total_price', 'message')
+        }),
+        ('Payment & Status', {
+            'fields': ('payment_status',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('listing')

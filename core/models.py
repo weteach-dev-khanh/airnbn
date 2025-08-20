@@ -223,3 +223,123 @@ class BlogPost(models.Model):
             from django.utils import timezone
             self.published_date = timezone.now()
         super().save(*args, **kwargs)
+
+
+# Course Models
+class CourseCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    name_vietnamese = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True, help_text="Lucide icon name")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = "Course Categories"
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name_vietnamese
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    instructor = models.CharField(max_length=100)
+    price = models.CharField(max_length=50)  # Store as string with formatting like "2,990,000"
+    duration = models.CharField(max_length=50)  # Store as string like "8 weeks"
+    image = models.CharField(max_length=200)  # Store image path like "/images/courses/airbnb-hosting.jpg"
+    students = models.IntegerField(default=0)
+    description = models.TextField()
+    curriculum = models.JSONField(default=list)  # Store curriculum as JSON array
+    features = models.JSONField(default=list)    # Store features as JSON array
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+    
+    def get_absolute_url(self):
+        return reverse('core:course_detail', kwargs={'slug': self.slug})
+
+    class Meta:
+        ordering = ['-created_at']
+    
+    # Course content
+    what_you_learn = models.TextField(help_text="What students will learn (JSON array or comma-separated)")
+
+class CourseLesson(models.Model):
+    course = models.ForeignKey(Course, related_name='lessons', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    video_url = models.URLField(blank=True, null=True)
+    duration = models.CharField(max_length=20, help_text="e.g., 15 phút")
+    order = models.PositiveIntegerField(default=0)
+    is_free = models.BooleanField(default=False, help_text="Free preview lesson")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order']
+        unique_together = ['course', 'order']
+    
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
+
+
+class CourseReview(models.Model):
+    course = models.ForeignKey(Course, related_name='reviews', on_delete=models.CASCADE)
+    student_name = models.CharField(max_length=100)
+    rating = models.PositiveIntegerField(choices=[(i, i) for i in range(1, 6)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.course.title} - {self.student_name} ({self.rating}★)"
+
+
+# Booking Models
+class Booking(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    # Booking details
+    listing = models.ForeignKey(AirbnbListing, on_delete=models.CASCADE, related_name='bookings')
+    
+    # Guest information
+    fullname = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    guests = models.PositiveIntegerField()
+    
+    # Stay details
+    checkin_date = models.DateField()
+    checkout_date = models.DateField()
+    nights = models.PositiveIntegerField()
+    total_price = models.DecimalField(max_digits=12, decimal_places=0)
+    
+    # Optional message
+    message = models.TextField(blank=True)
+    
+    # Payment and status
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.fullname} - {self.listing.title} ({self.checkin_date} to {self.checkout_date})"
+    
+    def get_duration_display(self):
+        return f"{self.nights + 1} ngày {self.nights} đêm"
+    
+    class Meta:
+        verbose_name = "Booking"
+        verbose_name_plural = "Bookings"
+        ordering = ['-created_at']
