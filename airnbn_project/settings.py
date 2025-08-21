@@ -74,12 +74,19 @@ WSGI_APPLICATION = 'airnbn_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'neondb',
+            'USER': 'neondb_owner',
         'PASSWORD': 'npg_ShZdQEJkY69p',
         'HOST': 'ep-dry-surf-a1dt75yn-pooler.ap-southeast-1.aws.neon.tech',
         'PORT': '5432'
