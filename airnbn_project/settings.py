@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hd(#7fj7*gw8+i+!b24j82q#^6($bbyr_r_*#heyw*)vs!tfzl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)  # Default to True for local development
 
 ALLOWED_HOSTS = ['*']
 
@@ -214,3 +214,10 @@ if not DEBUG:
     # Session settings
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
+else:
+    # Development settings - allow HTTP
+    SECURE_SSL_REDIRECT = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+
+
