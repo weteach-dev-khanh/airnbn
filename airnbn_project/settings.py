@@ -175,16 +175,14 @@ if not DEBUG:
 else:
     # Development
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# Media files configuration
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
-# Vercel Blob Storage settings
-VERCEL_BLOB_BASE_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com'
-BLOB_READ_WRITE_TOKEN = ''
+if DEBUG:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+else:
+    # Vercel Blob Storage settings
+    VERCEL_BLOB_BASE_URL = config('VERCEL_BLOB_BASE_URL', default='https://yryhdmorv8znchlu.public.blob.vercel-storage.com')
+    BLOB_READ_WRITE_TOKEN = config('BLOB_READ_WRITE_TOKEN', default='')
 
 # Login URLs
 LOGIN_URL = '/login/'
