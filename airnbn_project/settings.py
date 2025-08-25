@@ -167,10 +167,11 @@ else:
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+from storages.backends.s3boto3 import S3Boto3Storage
 # Static files configuration 
 STORAGES = {
     "default": {
-        "BACKEND": "apps.core.storage.CustomS3Storage",
+        "BACKEND": S3Boto3Storage,
         "OPTIONS": {
             "access_key": os.environ.get('AWS_ACCESS_KEY_ID'),
             "secret_key": os.environ.get('AWS_SECRET_ACCESS_KEY'),
@@ -189,7 +190,6 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     }
 }
-
 
 
 
