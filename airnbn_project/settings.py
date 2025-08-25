@@ -163,28 +163,36 @@ else:
         BASE_DIR / 'static',
     ]
 
-# Static files configuration for Vercel
-if not DEBUG:
-    # Production - use WhiteNoise without manifest for debugging
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-    # Add cache control for static files
-    WHITENOISE_MAX_AGE = 31536000  # 1 year
-    WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_AUTOREFRESH = True
-else:
-    # Development
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
 # Media files configuration
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+# Static files configuration 
+STORAGES = {
+    "default": {
+        "BACKEND": "apps.core.storage.CustomS3Storage",
+        "OPTIONS": {
+            "access_key": os.environ.get('AWS_ACCESS_KEY_ID'),
+            "secret_key": os.environ.get('AWS_SECRET_ACCESS_KEY'),
+            "bucket_name": "weteach-bucket",
+            "endpoint_url": "https://sgp1.digitaloceanspaces.com",
+            "region_name": "sgp1",
+            "file_overwrite": False,
+            "object_parameters": {
+                "CacheControl": "max-age=86400",
+            },
+            "querystring_auth": False,
+            "default_acl": "public-read",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    }
+}
 
 
-# Vercel Blob Storage settings
-VERCEL_BLOB_BASE_URL = 'https://yryhdmorv8znchlu.public.blob.vercel-storage.com'
-BLOB_READ_WRITE_TOKEN = ''
+
+
 
 # Login URLs
 LOGIN_URL = '/login/'
@@ -195,6 +203,7 @@ LOGOUT_REDIRECT_URL = '/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # Security settings for production
 if not DEBUG:
@@ -219,5 +228,3 @@ else:
     SECURE_SSL_REDIRECT = False
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-
-
